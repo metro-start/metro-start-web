@@ -4,7 +4,6 @@ import cgi
 import json
 import datetime
 import urllib
-import urlparse
 import webapp2
 import jinja2
 import os
@@ -62,11 +61,8 @@ class NewTheme(webapp2.RequestHandler):
 		theme.author = self.request.get('author')
 		theme.email = self.request.get('email')
 		theme.website = self.request.get('website')
-		url = urlparse.urlparse(theme.website)
-		if url.scheme == '':
-			newurl = list(url[:])
-			newurl[0] = 'http'
-			theme.website = urlparse.urlunparse(newurl)
+		if theme.website.startswith('http') == False:
+			theme.website = 'http://' + theme.website
 
 		theme.title_color = self.request.get('title-color')
 		theme.background_color = self.request.get('background-color')
