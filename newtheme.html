@@ -3,10 +3,18 @@
 		<title>submit new themes</title>
 		<link type="text/css" rel="stylesheet" href="/css/reset.css" />
 		<link type="text/css" rel="stylesheet" href="/css/main.css" />
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<style type="text/css">
+			{% for e in err %}
+			input[name={{ e }}] {
+				background-color: red;
+			}
+			{% endfor %}
+		</style>
 	</head>
 	<body>
 		<h1>submit new themes</h1>
-			<form action="/newtheme" method="post">
+			<form action="/newtheme" method="get">
 				<table>
 					<tbody>
 						<col/>
@@ -25,6 +33,11 @@
 							<td>
 								<input type="text" name="author" value="{{ author }}" />
 							</td>
+							<!--
+							<td>
+								<p class="author-div">how your name will be displayed</p>
+							</td>
+							-->
 						</tr>
 						<tr>
 							<td>
@@ -33,6 +46,11 @@
 							<td>
 								<input type="text" name="email" value="{{ email }}" />
 							</td>
+							<!--
+							<td>
+								<p class="email-div">(will not be displayed)</p>
+							</td>
+							-->
 						</tr>
 						<tr>
 							<td>
@@ -47,7 +65,7 @@
 								<label for="title-color">title color</label>
 							</td>
 							<td>
-								<input type="text" name="title-color" value="#{{ title_color }}" />
+								<input type="text" name="titlecolor" value="{{ title_color }}" />
 							</td>
 						</tr>
 						<tr>
@@ -55,7 +73,7 @@
 								<label for="background-color">background color</label>
 							</td>
 							<td>
-								<input type="text" name="background-color" value="#{{ background_color }}" />
+								<input type="text" name="backgroundcolor" value="{{ background_color }}" />
 							</td>
 						</tr>
 						<tr>
@@ -63,7 +81,7 @@
 								<label for="main-color">main color</label>
 							</td>
 							<td>
-								<input type="text" name="main-color" value="#{{ main_color  }}" />
+								<input type="text" name="maincolor" value="{{ main_color  }}" />
 							</td>
 						</tr>
 						<tr>
@@ -71,7 +89,7 @@
 								<label for="options-color">options color</label>
 							</td>
 							<td>
-								<input type="text" name="options-color" value="#{{  options_color }}" />
+								<input type="text" name="optionscolor" value="{{  options_color }}" />
 							</td>
 						</tr>
 						<tr>
@@ -82,5 +100,18 @@
 					</tbody>
 				</table>
 			</form>
+		<script type="text/javascript">
+			$(function() {
+					//$('td>p').hide();
+					/*
+					   $('input').on('focus', function() {
+					   $('.' + $(this).prop('name') + '-div').fadeIn('fast');
+					   });
+					   $('input').on('blur', function() {
+					   $('.' + $(this).prop('name') + '-div').fadeOut('fast');
+					   });
+					*/
+			});
+		</script>
 	</body>
 </html>

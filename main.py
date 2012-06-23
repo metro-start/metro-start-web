@@ -38,39 +38,75 @@ class MainHandler(webapp2.RequestHandler):
 		self.response.out.write(template.render(template_values))
 
 class NewTheme(webapp2.RequestHandler):
-	def get(self):
-		template_values = {
-			'author': self.request.get('author'),
-			'title': self.request.get('title'),
-			'author': self.request.get('author'),
-			'email': self.request.get('email'),
-			'website': self.request.get('website'),
-			'title_color': self.request.get('titlecolor'),
-			'background_color': self.request.get('backgroundcolor'),
-			'main_color': self.request.get('maincolor'),
-			'options_color': self.request.get('optionscolor'),
-		}
-		template = jinja_environment.get_template('newtheme.html')
-		self.response.out.write(template.render(template_values))
+	#	def get(self):
+#		template_values = {
+#			'author': self.request.get('author'),
+#			'title': self.request.get('title'),
+#			'author': self.request.get('author'),
+#			'email': self.request.get('email'),
+#			'website': self.request.get('website'),
+#			'title_color': self.request.get('titlecolor'),
+#			'background_color': self.request.get('backgroundcolor'),
+#			'main_color': self.request.get('maincolor'),
+#			'options_color': self.request.get('optionscolor'),
+#		}
+#		template = jinja_environment.get_template('newtheme.html')
+#		self.response.out.write(template.render(template_values))
 	
-	def post(self):
-		theme_name = self.request.get('title')
+	def get(self):
+		err = []
 		theme = Theme()
-		theme.author = self.request.get('author')
 		theme.title = self.request.get('title')
-		theme.author = self.request.get('author')
-		theme.email = self.request.get('email')
-		theme.website = self.request.get('website')
-		if theme.website.startswith('http') == False:
-			theme.website = 'http://' + theme.website
+		themes = Theme.gql("WHERE title = :1", theme.author)
+		if themes.count() > 0:
+			err.append('title')
 
-		theme.title_color = self.request.get('title-color')
-		theme.background_color = self.request.get('background-color')
-		theme.main_color = self.request.get('main-color')
-		theme.options_color = self.request.get('options-color')
-		theme.put()
+		theme.website = self.request.get('website')
+		if theme.website.strip() != '' and theme.website.startswith('http') == False:
+			theme.website = 'http://' + theme.website
 		
-		self.redirect('/')
+		theme.author = self.request.get('author')
+		if theme.author.strip() == '':
+			err.append('author')
+
+		theme.email = self.request.get('email')
+		if theme.email.strip() == '':
+			err.append('email')
+
+		theme.title_color = self.request.get('titlecolor')
+		if theme.title_color.strip() == '':
+			err.append('title_color')
+
+		theme.background_color = self.request.get('backgroundcolor')
+		if theme.background_color.strip() == '':
+			err.append('background_color')
+
+		theme.main_color = self.request.get('maincolor')
+		if theme.main_color.strip() == '':
+			err.append('main_color')
+
+		theme.options_color = self.request.get('optionscolor')
+		if theme.options_color.strip() == '':
+			err.append('options_color')
+
+		if len(err) == 0:
+			theme.put()
+			self.redirect('/')
+		else:
+			template_values = {
+				'author': self.request.get('author'),
+				'title': self.request.get('title'),
+				'author': self.request.get('author'),
+				'email': self.request.get('email'),
+				'website': self.request.get('website'),
+				'title_color': self.request.get('titlecolor'),
+				'background_color': self.request.get('backgroundcolor'),
+				'main_color': self.request.get('maincolor'),
+				'options_color': self.request.get('optionscolor'),
+				'err': err,
+			}
+			template = jinja_environment.get_template('newtheme.html')
+			self.response.out.write(template.render(template_values))
 
 
 class ThemeJson(webapp2.RequestHandler):
