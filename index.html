@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<title>metro start gallery</title>
+		<link type="text/css" rel="stylesheet" href="/css/reset.css" />
+		<link type="text/css" rel="stylesheet" href="/css/main.css" />
+	</head>
+	<body>
+		<h1>metro start gallery</h1>
+		<div class="themes">
+			{% for theme in themes %}
+			<div class="theme">
+				<p class="title">{{ theme.title }}</p>
+				{% if theme.website %}
+				<p class="author"><a class="website" href="{{ theme.website }}">{{ theme.author }}</a></p>
+				{% else %}
+				<p class="author">{{ theme.author }}</p>
+				{% endif %}
+			</div>
+			{% endfor %}
+		</div>
+	</body>
+</html>

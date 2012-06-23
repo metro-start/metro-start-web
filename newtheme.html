@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<title>submit new themes</title>
+		<link type="text/css" rel="stylesheet" href="/css/reset.css" />
+		<link type="text/css" rel="stylesheet" href="/css/main.css" />
+	</head>
+	<body>
+		<h1>submit new themes</h1>
+			<form action="/newtheme" method="post">
+				<table>
+					<tbody>
+						<col/>
+						<tr>
+							<td>
+								<label for="title">title</label>
+							</td>
+							<td>
+								<input type="text" name="title" value="{{ title }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="author">author</label>
+							</td>
+							<td>
+								<input type="text" name="author" value="{{ author }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="email">email</label>
+							</td>
+							<td>
+								<input type="text" name="email" value="{{ email }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="website">website</label>
+							</td>
+							<td>
+								<input type="text" name="website" value="{{ website }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="title-color">title color</label>
+							</td>
+							<td>
+								<input type="text" name="title-color" value="#{{ title_color }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="background-color">background color</label>
+							</td>
+							<td>
+								<input type="text" name="background-color" value="#{{ background_color }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="main-color">main color</label>
+							</td>
+							<td>
+								<input type="text" name="main-color" value="#{{ main_color  }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="options-color">options color</label>
+							</td>
+							<td>
+								<input type="text" name="options-color" value="#{{  options_color }}" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="submit" class="submit" value="submit theme">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+	</body>
+</html>

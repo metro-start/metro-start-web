@@ -1,0 +1,44 @@
+body {
+	font-family: Helvetica, 'Segoe UI', Arial, sans-serif;
+	font-size: 28px;
+}
+h1 {
+	font-size: 128px;
+	margin: 10px;
+	margin-left: 15px;
+}
+.theme {
+	margin-bottom: 20px;
+}
+.title {
+	font-size: 40px;
+	margin-bottom: 5px;
+	cursor: pointer;
+}
+.author {
+	font-size: 28px;
+}
+a {
+	text-decoration: none;
+	color: inherit;
+}
+form, .themes {
+	margin-left: 20px;
+}
+td {
+	padding-right: 26px;
+	padding-bottom: 13px;
+}
+input {
+	font-family: Helvetica, 'Segoe UI', Arial, sans-serif;
+	font-size: 28px;
+	padding-left: 1px;
+	border-style: none;
+	border-bottom-style: solid;
+	outline: none;
+}
+.submit {
+	background-color: inherit;
+	padding-left: 0px;
+	border-style: none;
+}
