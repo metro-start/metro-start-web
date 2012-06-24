@@ -7,6 +7,9 @@ h1 {
 	margin: 10px;
 	margin-left: 15px;
 }
+h2 {
+	color: red;
+}
 .theme {
 	margin-bottom: 20px;
 }
@@ -32,13 +35,15 @@ td {
 input {
 	font-family: Helvetica, 'Segoe UI', Arial, sans-serif;
 	font-size: 28px;
-	padding-left: 1px;
+	padding: 2px;
 	border-style: none;
-	border-bottom-style: solid;
+	border-style: solid;
+	border-width: 1px;
 	outline: none;
 }
 .submit {
 	background-color: inherit;
 	padding-left: 0px;
 	border-style: none;
+	color: red;
 }

@@ -17,7 +17,15 @@
 			<form action="/newtheme" method="get">
 				<table>
 					<tbody>
-						<col/>
+						{% if err|length != 0 %}
+						<tr>
+							<td>
+							</td>
+							<td>
+								<h2>please add missing details</h2>
+							</td>
+						</tr>
+						{% endif %}
 						<tr>
 							<td>
 								<label for="title">title</label>
