@@ -24,12 +24,13 @@ class Theme(db.Model):
 		main_color = db.StringProperty()
 		options_color = db.StringProperty()
 		date = db.DateTimeProperty(auto_now_add=True)
+		approved = db.IntegerProperty(default=1)
 
 class MainHandler(webapp2.RequestHandler):
 	def get(self):
 		themes = db.GqlQuery("SELECT * "
 		   "FROM Theme "
-		   "ORDER BY date DESC LIMIT 10")
+		   "ORDER BY date DESC LIMIT 20")
 
 		template_values = {
 			'themes': themes,
@@ -112,8 +113,8 @@ class NewTheme(webapp2.RequestHandler):
 class ThemeJson(webapp2.RequestHandler):
 	def get(self):
 		themes = db.GqlQuery("SELECT author, email, website, title, title_color, background_color, main_color, options_color "
-		   "FROM Theme "
-		   "ORDER BY date DESC LIMIT 10")
+		   "FROM Theme WHERE approved = 1"
+		   "ORDER BY date DESC")
 		self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
 		resp = [db.to_dict(t) for t in themes]
 		self.response.write(json.dumps(resp))
