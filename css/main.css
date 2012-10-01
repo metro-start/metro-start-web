@@ -28,6 +28,9 @@ a {
 form, .themes {
 	margin-left: 20px;
 }
+form {
+	float: left;
+}
 td {
 	padding-right: 26px;
 	padding-bottom: 13px;
@@ -46,4 +49,45 @@ input {
 	padding-left: 0px;
 	border-style: none;
 	color: red;
+}
+
+.sample {
+	width: 360px;
+	height: 228px;
+	float: left;
+	margin-top: 150px;
+}
+.start {
+	width: 300px;
+	float: left;
+	margin-top: 10px;
+	margin-left: 15px;
+	font-size: 40px;
+	color: white;
+}
+.menu {
+	width: 180px;
+	height: 20px;
+	float: left;
+	margin-left: 15px;
+	margin-right: 200px;
+	margin-top: 10px;
+}
+.list {
+	width: 100px;
+	height: 100px;
+	margin-left: 15px;
+	margin-top: 15px;
+	float: left;
+}
+.main-text {
+	width: 100px;
+	height: 20px;
+	margin-bottom: 15px;
+}
+.wrench {
+	width: 100px;
+	height: 20px;
+	float: left;
+	margin-left: 15px;
 }

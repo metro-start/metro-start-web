@@ -116,9 +116,13 @@ class ThemeJson(webapp2.RequestHandler):
 		   "FROM Theme WHERE approved = 1"
 		   "ORDER BY date DESC")
 		self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
-		resp = [db.to_dict(t) for t in themes]
-		self.response.write(json.dumps(resp))
-		#self.response.out.write('''[{"title": "summer bliss","author": "chuma","link": "http://www.twitter.com/chustar","colors": {"options-color": "#ff0000","main-color": "#ffff00","title-color": "#4a114a","background-color": "#550000"}},{"title": "midnight run","author": "chuma","link": "http://www.chumannaji.com","colors": {"options-color": "#bf0000","main-color": "#ff8f00","title-color": "#4a114a","background-color": "#050000"}}]''')
+		outThemes = []
+		for t in themes:
+			t.email = ''
+			outThemes.append(db.to_dict(t))
+
+		outThemes = [db.to_dict(t) for t in themes]
+		self.response.write(json.dumps(outThemes))
 
 app = webapp2.WSGIApplication([('/', MainHandler), 
 							   ('/newtheme', NewTheme),
