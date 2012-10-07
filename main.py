@@ -14,23 +14,26 @@ jinja_environment = jinja2.Environment(
 		    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 class Theme(db.Model):
-		author = db.StringProperty()
-		title = db.StringProperty()
-		author = db.StringProperty()
-		email = db.StringProperty()
-		website = db.StringProperty()
-		title_color = db.StringProperty()
-		background_color = db.StringProperty()
-		main_color = db.StringProperty()
-		options_color = db.StringProperty()
-		date = db.DateTimeProperty(auto_now_add=True)
-		approved = db.IntegerProperty(default=1)
+	author = db.StringProperty()
+	title = db.StringProperty()
+	author = db.StringProperty()
+	email = db.StringProperty()
+	website = db.StringProperty()
+	title_color = db.StringProperty()
+	background_color = db.StringProperty()
+	main_color = db.StringProperty()
+	options_color = db.StringProperty()
+	date = db.DateTimeProperty(auto_now_add=True)
+	approved = db.IntegerProperty(default=1)
 
 class MainHandler(webapp2.RequestHandler):
 	def get(self):
 		themes = db.GqlQuery("SELECT * "
 		   "FROM Theme "
 		   "ORDER BY date DESC LIMIT 20")
+		
+		for t in themes:
+			t.email = ''
 
 		template_values = {
 			'themes': themes,
@@ -121,7 +124,6 @@ class ThemeJson(webapp2.RequestHandler):
 			t.email = ''
 			outThemes.append(db.to_dict(t))
 
-		outThemes = [db.to_dict(t) for t in themes]
 		self.response.write(json.dumps(outThemes))
 
 app = webapp2.WSGIApplication([('/', MainHandler), 

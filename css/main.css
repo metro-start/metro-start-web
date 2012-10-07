@@ -16,14 +16,13 @@ h2 {
 .title {
 	font-size: 40px;
 	margin-bottom: 5px;
-	cursor: pointer;
 }
 .author {
 	font-size: 28px;
 }
 a {
 	text-decoration: none;
-	color: inherit;
+	color: red;
 }
 form, .themes {
 	margin-left: 20px;
