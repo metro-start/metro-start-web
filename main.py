@@ -101,7 +101,7 @@ class NewThemeHandler(webapp2.RequestHandler):
 
         if len(err) == 0:
             theme.put()
-            self.redirect('/')
+            self.redirect('/themes')
         else:
             template_values = {
                 'author': self.request.get('author'),
