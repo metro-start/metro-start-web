@@ -1,14 +1,21 @@
 body {
-	font-family: Helvetica, 'Segoe UI', Arial, sans-serif;
+	font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
 	font-size: 28px;
+	background-color: black;
+	color: white;
 }
 h1 {
 	font-size: 128px;
-	margin: 10px;
-	margin-left: 15px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	text-align: center;
 }
 h2 {
-	color: red;
+	font-size: 60px;
+}
+.info {
+	margin-bottom: 20px;
+	text-align: center;
 }
 .theme {
 	margin-bottom: 20px;
@@ -16,6 +23,9 @@ h2 {
 .title {
 	font-size: 40px;
 	margin-bottom: 5px;
+	cursor: pointer;
+	width: 555px;
+	text-overflow: ellipsis;
 }
 .author {
 	font-size: 28px;
@@ -25,10 +35,9 @@ a {
 	color: red;
 }
 form, .themes {
-	margin-left: 20px;
-}
-form {
+	margin-left: 10%;
 	float: left;
+	margin-right: 20px;
 }
 td {
 	padding-right: 26px;
@@ -41,21 +50,28 @@ input {
 	border-style: none;
 	border-style: solid;
 	border-width: 1px;
+	border-color: white;
 	outline: none;
 }
 .submit {
 	background-color: inherit;
-	padding-left: 0px;
+	padding-left: 0;
 	border-style: none;
 	color: red;
 }
-
 .sample {
+	float: right;
+	margin-right: 10%;
+}
+.title-text {
+	width: 360px;
+	text-overflow: ellipsis;
+}
+.background-color {
+	margin-top: 10px;
 	width: 360px;
 	height: 228px;
-	float: left;
-	margin-top: 150px;
-	margin-left: 10px;;
+	clear: both;
 }
 .start {
 	width: 300px;
@@ -64,6 +80,7 @@ input {
 	margin-left: 15px;
 	font-size: 40px;
 	color: white;
+	color: black;
 }
 .menu {
 	width: 180px;

@@ -1,22 +1,34 @@
+<!DOCTYPE html>
 <html>
-	<head>
-		<title>metro start gallery</title>
-		<link type="text/css" rel="stylesheet" href="/css/reset.css" />
-		<link type="text/css" rel="stylesheet" href="/css/main.css" />
-	</head>
-	<body>
-		<h1>metro start gallery</h1>
-		<div class="themes">
-			{% for theme in themes %}
-			<div class="theme">
-				<p class="title">{{ theme.title }}</p>
-				{% if theme.website %}
-				<p class="author"><a class="website" href="{{ theme.website }}">{{ theme.author }}</a></p>
-				{% else %}
-				<p class="author">{{ theme.author }}</p>
-				{% endif %}
-			</div>
-			{% endfor %}
+<head>
+	<title>metro start</title>
+	<link type="text/css" rel="stylesheet" href="/css/reset.css" />
+	<link type="text/css" rel="stylesheet" href="/css/main.css" />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://cloud.github.com/downloads/malsup/cycle/jquery.cycle.all.latest.js"></script>
+</head>
+<body style="width: 960px; margin: auto">
+	<h1>metro start</h1>
+	<p class="info">Experience a new start page for Google Chrome.</p>
+	<p class="info" style="font-size: smaller">Designed to get you from start to the web with minimal friction.</p>
+	<p class="info">
+		<a href="https://chrome.google.com/webstore/detail/metro-start/bbhdfpmfdplolnnkpdepnelcfdmikjfd">Get Metro Start Now</a>
+	</p>
+	<p class="info">
+		<a href="/themes">Browse Themes</a>
+	</p>
+	<a href="https://chrome.google.com/webstore/detail/metro-start/bbhdfpmfdplolnnkpdepnelcfdmikjfd" style="">
+		<div class="slideshow">
+			<img style="" src="/img/banner1.png" alt="Screenshot of metro start." />
+			<img style="" src="/img/banner2.png" alt="Screenshot of metro start." />
+			<img style="" src="/img/banner3.png" alt="Screenshot of metro start." />
 		</div>
-	</body>
+	</a>
+	<a href="https://github.com/metro-start/metro-start"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub" /></a>
+	<script type="text/javascript">
+		$('.slideshow').cycle({
+			fx: 'scrollLeft'
+		});
+	</script>
+</body>
 </html>
