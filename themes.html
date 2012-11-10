@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>metro start gallery</title>
-	<link type="text/css" rel="stylesheet" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" href="css/main.css" />
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script src="js/script.js"></script>
-</head>
-<body>
-	<h1><a href="/" style="color: inherit">metro start gallery</a></h1>
-	<h2 class="info"><a href="/newtheme">submit new theme</a></h2>
-	{% if themes != "[]" %}
-	<div class="themes">
-	</div>
-	<div class="sample">
-		<p class="title-text">preview</p>
-		<div class="background-color">
-			<div>
-				<div class="title-color start">start here...</div>
-				<div class="menu options-color"></div>
-				<div class="list">
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
+	<head>
+		<title>metro start gallery</title>
+		<link type="text/css" rel="stylesheet" href="/css/reset.css" />
+		<link type="text/css" rel="stylesheet" href="/css/main.css" />
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="/js/jquery.color.js"></script>
+	</head>
+	<body>
+		<h1><a href="/" style="color: inherit">metro start gallery</a></h1>
+		<div class="nav">
+			<a href="/">metro start</a>
+			<span class="active">browse themes</span>
+			<a href="/newtheme">share themes</a>
+			<a href="http://www.chumannaji.com">about me</a>
+		</div>
+		{% if themes != "[]" %}
+		<div class="themes">
+		</div>
+		<div class="sample">
+			<p class="title-text"></p>
+			<div class="background-color">
+				<div>
+					<div class="title-color start">start here...</div>
+					<div class="menu options-color"></div>
+					<div class="list">
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+					</div>
+					<div class="list">
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+					</div>
+					<div class="list">
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+						<div class="main-color main-text"></div>
+					</div>
+					<div class="options-color wrench"></div>
 				</div>
-				<div class="list">
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
-				</div>
-				<div class="list">
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
-					<div class="main-color main-text"></div>
-				</div>
-				<div class="options-color wrench"></div>
 			</div>
 		</div>
-	</div>
-	{% endif %}
-	<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub" /></a>
-	<script type="text/javascript">
+		{% endif %}
+		<a href="https://github.com/metro-start/metro-start"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub" /></a>
+		<script type="text/javascript">
 
-		$(function() {
-			var data = '{{ themes }}';
-	//	$.get('http://www.metro-start.appspot.com/themes.json', function(data) {
-		var themes = JSON.parse(data);
-		//console.log(themes);
-		for (var i = 0; i < themes.length; i++) {
-			var theme = themes[i];
-			var me = theme;
-			var themeObj = $('<div class="theme">' +
-				'<p class="title">' + theme.title + '</p>' +
-				'<p class="author">' + (theme.website ? '<a class="website" href="'+ theme.website + '">' + theme.author + '</a>' : theme.author) + '</p>' +
-				'</div>');
-			themeObj.data('theme', theme);
-			(function(theme) {
-				themeObj.on('click', function() {
-					$('.title-text').text('preview of ' + theme.title);
-					$('.main-color').css('background-color', theme.main_color);
-					$('.options-color').css('background-color', theme.options_color);
-					$('.background-color').css('background-color', theme.background_color);
-					$('.title-color').css('color', theme.title_color);
-				});
-				$('.themes').append(themeObj);
-			})(theme);
-		};
-	});
-	</script>
+			$(function() {
+					var data = '{{ themes }}';
+					var themes = eval(data);
+					//console.log(themes);
+					for (var i = 0; i < themes.length; i++) {
+					var theme = themes[i];
+					var me = theme;
+					var title = $('<span class="title" style="">' + theme.title + '</span><br />');
+					var author = $('<span class="author" style="">' + (theme.website ? '<a class="website" href="'+ theme.website + '">' + theme.author + '</a>' : theme.author) + '</span>');
+					var themeObj = $('<div class="theme"></div>');
+					themeObj.append(title);
+					themeObj.append(author);
+
+					(function(theme) {
+					 title.hover(function() {
+						 $('.title-text').text('preview of ' + theme.title);
+						 $('.title-text').fadeIn(400);
+						 $('.main-color, .options-color, .background-color, .title-color').show();
+						 $('.main-color').animate({'backgroundColor': theme.main_color}, {duration: 400, queue: false});
+						 $('.options-color').animate({'backgroundColor': theme.options_color}, {duration: 400, queue: false});
+						 $('.background-color').animate({'backgroundColor': theme.background_color}, {duration: 400, queue: false});
+						 $('.title-color').animate({'color': theme.title_color}, {duration: 400, queue: false});
+						 });
+					 $('.themes').append(themeObj);
+					 })(theme);
+					};
+			});
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25604585-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </body>
 </html>

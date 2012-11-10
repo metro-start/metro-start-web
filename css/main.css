@@ -3,6 +3,8 @@ body {
 	font-size: 28px;
 	background-color: black;
 	color: white;
+	-webkit-font-smoothing: antialiased;
+	font-smoothing: antialiased;
 }
 h1 {
 	font-size: 128px;
@@ -12,6 +14,19 @@ h1 {
 }
 h2 {
 	font-size: 60px;
+}
+.nav {
+	text-align: center;
+}
+.active {
+	color: red;
+}
+.nav {
+margin-bottom: 10px;
+}
+.nav > a {
+	opacity: 0.5;
+	margin-left: 20px;
 }
 .info {
 	margin-bottom: 20px;
@@ -60,8 +75,10 @@ input {
 	color: red;
 }
 .sample {
-	float: right;
-	margin-right: 10%;
+	position: fixed;
+	right: 10%;
+	top: 50%;
+	margin-top: -114px;
 }
 .title-text {
 	width: 360px;

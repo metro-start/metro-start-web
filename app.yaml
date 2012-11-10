@@ -9,7 +9,9 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
-
+- url: /googleeb3e27d9b6e63452\.html
+  static_files: googleeb3e27d9b6e63452.html
+  upload: googleeb3e27d9b6e63452\.html
 - url: /css
   static_dir: css
 - url: /js
