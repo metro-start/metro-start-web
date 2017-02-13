@@ -67,22 +67,9 @@ class NewThemeHandler(webapp2.RequestHandler):
         err = []
         theme = Theme()
         theme.title = self.request.get('title')
-        themes = Theme.gql("WHERE title = :1", theme.author)
-        if themes.count() > 0:
-            err.append('title')
-
         theme.website = self.request.get('website')
-        if theme.website.strip() != '' and theme.website.startswith('http') == False:
-            theme.website = 'http://' + theme.website
-
         theme.author = self.request.get('author')
-        if theme.author.strip() == '':
-            err.append('author')
-
         theme.email = self.request.get('email')
-        if theme.email.strip() == '':
-            err.append('email')
-
         theme.title_color = self.request.get('titlecolor')
         if theme.title_color.strip() == '':
             err.append('title_color')
@@ -101,6 +88,7 @@ class NewThemeHandler(webapp2.RequestHandler):
 
         if len(err) == 0:
             theme.put()
+            self.response.out.write(200)
             self.redirect('/themes')
         else:
             template_values = {
@@ -122,4 +110,4 @@ app = webapp2.WSGIApplication([('/', MainHandler),
                                ('/themes', ThemesHandler),
                                ('/newtheme', NewThemeHandler),
                                ('/themes.json', ThemeJsonHandler)],
-                               debug=True)
+                              debug=True)
