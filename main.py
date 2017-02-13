@@ -11,12 +11,9 @@ jinja_environment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 
-class Theme(db.Model):
-    author = db.StringProperty()
+class ColorTheme(db.Model):
     title = db.StringProperty()
     author = db.StringProperty()
-    email = db.StringProperty()
-    website = db.StringProperty()
     title_color = db.StringProperty()
     background_color = db.StringProperty()
     main_color = db.StringProperty()
@@ -27,31 +24,13 @@ class Theme(db.Model):
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        template = jinja_environment.get_template('index.html')
-        self.response.out.write(template.render())
-
-
-class ThemesHandler(webapp2.RequestHandler):
-    def get(self):
-        themes = db.GqlQuery("SELECT author, website, title, title_color, background_color, main_color, options_color "
-           "FROM Theme WHERE approved = 1 "
-           "ORDER BY date DESC LIMIT 20")
-
-        outThemes = []
-        for t in themes:
-            outThemes.append(db.to_dict(t))
-
-        template_values = {
-            'themes': json.dumps(outThemes),
-        }
-        template = jinja_environment.get_template('themes.html')
-        self.response.out.write(template.render(template_values))
+        self.redirect('http://metro-start.com')
 
 
 class ThemeJsonHandler(webapp2.RequestHandler):
     def get(self):
-        themes = db.GqlQuery("SELECT author, website, title, title_color, background_color, main_color, options_color "
-           "FROM Theme WHERE approved = 1 "
+        themes = db.GqlQuery("SELECT author, title, title_color, background_color, main_color, options_color "
+           "FROM ColorTheme WHERE approved = 1 "
            "ORDER BY date DESC")
 
         self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
@@ -65,49 +44,39 @@ class ThemeJsonHandler(webapp2.RequestHandler):
 class NewThemeHandler(webapp2.RequestHandler):
     def get(self):
         err = []
-        theme = Theme()
-        theme.title = self.request.get('title')
-        theme.website = self.request.get('website')
-        theme.author = self.request.get('author')
-        theme.email = self.request.get('email')
-        theme.title_color = self.request.get('titlecolor')
-        if theme.title_color.strip() == '':
+
+        colorTheme = ColorTheme()
+        colorTheme.author = self.request.get('author')
+
+        colorTheme.title = self.request.get('title')
+        if colorTheme.title.strip() == '':
             err.append('title_color')
 
-        theme.background_color = self.request.get('backgroundcolor')
-        if theme.background_color.strip() == '':
+        colorTheme.title_color = self.request.get('titlecolor')
+        if colorTheme.title_color.strip() == '':
+            err.append('title_color')
+
+        colorTheme.background_color = self.request.get('backgroundcolor')
+        if colorTheme.background_color.strip() == '':
             err.append('background_color')
 
-        theme.main_color = self.request.get('maincolor')
-        if theme.main_color.strip() == '':
+        colorTheme.main_color = self.request.get('maincolor')
+        if colorTheme.main_color.strip() == '':
             err.append('main_color')
 
-        theme.options_color = self.request.get('optionscolor')
-        if theme.options_color.strip() == '':
+        colorTheme.options_color = self.request.get('optionscolor')
+        if colorTheme.options_color.strip() == '':
             err.append('options_color')
 
+        self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
         if len(err) == 0:
-            theme.put()
+            colorTheme.put()
             self.response.out.write(200)
-            self.redirect('/themes')
         else:
-            template_values = {
-                'author': self.request.get('author'),
-                'title': self.request.get('title'),
-                'author': self.request.get('author'),
-                'email': self.request.get('email'),
-                'website': self.request.get('website'),
-                'title_color': self.request.get('titlecolor'),
-                'background_color': self.request.get('backgroundcolor'),
-                'main_color': self.request.get('maincolor'),
-                'options_color': self.request.get('optionscolor'),
-                'err': err,
-            }
-            template = jinja_environment.get_template('newtheme.html')
-            self.response.out.write(template.render(template_values))
+            self.response.out.write(400)
+
 
 app = webapp2.WSGIApplication([('/', MainHandler),
-                               ('/themes', ThemesHandler),
                                ('/newtheme', NewThemeHandler),
                                ('/themes.json', ThemeJsonHandler)],
                               debug=True)
