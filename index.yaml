@@ -10,3 +10,12 @@ indexes:
   - name: main_color
   - name: options_color
   - name: title_color
+
+- kind: Theme
+  properties:
+  - name: author
+  - name: background_color
+  - name: main_color
+  - name: options_color
+  - name: title
+  - name: title_color
