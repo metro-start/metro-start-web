@@ -7,74 +7,43 @@ import os
 
 from google.appengine.ext import db
 
-jinja_environment = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
-
-class ColorTheme(db.Model):
-    title = db.StringProperty()
-    author = db.StringProperty()
-    title_color = db.StringProperty()
-    background_color = db.StringProperty()
-    main_color = db.StringProperty()
-    options_color = db.StringProperty()
+class Theme(db.Expando):
     date = db.DateTimeProperty(auto_now_add=True)
-    approved = db.IntegerProperty(default=1)
 
+class BaseHandler(webapp2.RequestHandler):
+    def dispatch(self):
+        self.response.headers.add_header('Access-Control-Allow-Origin', '*')
+        self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
+        webapp2.RequestHandler.dispatch(self)
 
-class MainHandler(webapp2.RequestHandler):
+class MainHandler(BaseHandler):
     def get(self):
         self.redirect('http://metro-start.com')
 
 
-class ThemeJsonHandler(webapp2.RequestHandler):
+class ThemeJsonHandler(BaseHandler):
     def get(self):
-        themes = db.GqlQuery("SELECT author, title, title_color, background_color, main_color, options_color "
-           "FROM ColorTheme WHERE approved = 1 "
-           "ORDER BY date DESC")
-
-        self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
-        outThemes = []
-        for t in themes:
-            outThemes.append(db.to_dict(t))
-
-        self.response.write(json.dumps(outThemes))
+        themes = map(lambda t: t.json, db.GqlQuery("SELECT json FROM Theme ORDER BY date DESC"))
+        self.response.write(themes)
 
 
-class NewThemeHandler(webapp2.RequestHandler):
-    def get(self):
+class NewThemeHandler(BaseHandler):
+    def post(self):
         err = []
-
-        colorTheme = ColorTheme()
-        colorTheme.author = self.request.get('author')
-
-        colorTheme.title = self.request.get('title')
-        if colorTheme.title.strip() == '':
-            err.append('title_color')
-
-        colorTheme.title_color = self.request.get('titlecolor')
-        if colorTheme.title_color.strip() == '':
-            err.append('title_color')
-
-        colorTheme.background_color = self.request.get('backgroundcolor')
-        if colorTheme.background_color.strip() == '':
-            err.append('background_color')
-
-        colorTheme.main_color = self.request.get('maincolor')
-        if colorTheme.main_color.strip() == '':
-            err.append('main_color')
-
-        colorTheme.options_color = self.request.get('optionscolor')
-        if colorTheme.options_color.strip() == '':
-            err.append('options_color')
-
-        self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
+        
+        theme = Theme()
+        theme.json = next(iter(self.request.arguments()))
+        
         if len(err) == 0:
-            colorTheme.put()
+            theme.put()
             self.response.out.write(200)
         else:
             self.response.out.write(400)
 
+    def options(self):
+        pass
 
 app = webapp2.WSGIApplication([('/', MainHandler),
                                ('/newtheme', NewThemeHandler),
