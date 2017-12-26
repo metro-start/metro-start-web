@@ -1,12 +1,1 @@
 indexes:
-- kind: ColorTheme
-  properties:
-  - name: approved
-  - name: date
-    direction: desc
-  - name: author
-  - name: title
-  - name: background_color
-  - name: main_color
-  - name: options_color
-  - name: title_color
