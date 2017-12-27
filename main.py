@@ -9,8 +9,10 @@ from google.appengine.ext import db
 
 jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
-class Theme(db.Expando):
+class Theme(db.Model):
     date = db.DateTimeProperty(auto_now_add=True)
+    json = db.StringProperty()
+
 
 class BaseHandler(webapp2.RequestHandler):
     def dispatch(self):
@@ -25,8 +27,8 @@ class MainHandler(BaseHandler):
 
 class ThemeJsonHandler(BaseHandler):
     def get(self):
-        themes = map(lambda t: t.json, db.GqlQuery("SELECT json FROM Theme ORDER BY date DESC"))
-        self.response.write(themes)
+        themes = map(lambda t: json.loads(t.json), db.GqlQuery("SELECT date, json FROM Theme ORDER BY date DESC"))
+        self.response.write(json.dumps(themes))
 
 
 class NewThemeHandler(BaseHandler):
@@ -44,6 +46,19 @@ class NewThemeHandler(BaseHandler):
 
     def options(self):
         pass
+
+
+# class CloneThemesHandler(BaseHandler):
+#     def get(self):
+#         oldThemes = db.GqlQuery("SELECT author, title, title_color, background_color, main_color, options_color "
+#            "FROM ColorTheme WHERE approved = 1 "
+#            "ORDER BY date DESC")
+
+#         for oldTheme in oldThemes:
+#             newTheme = Theme()
+#             newTheme.json = json.dumps(db.to_dict(oldTheme))
+#             newTheme.put()
+
 
 app = webapp2.WSGIApplication([('/', MainHandler),
                                ('/newtheme', NewThemeHandler),
