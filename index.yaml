@@ -1,1 +1,6 @@
 indexes:
+- kind: Theme
+  properties:
+  - name: date
+    direction: desc
+  - name: json
