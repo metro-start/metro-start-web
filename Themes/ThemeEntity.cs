@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
@@ -7,28 +8,13 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace MetroStart
 {
-    public class ThemeContent
-    {
-        public ThemeContent(string title_color, string background_color, string main_color, string options_color)
-        {
-            TitleColor = title_color;
-            BackgroundColor = background_color;
-            MainColor = main_color;
-            OptionsColor = options_color;
-        }
-
-        public string TitleColor { get; set; }
-        public string BackgroundColor { get; set; }
-        public string MainColor { get; set; }
-        public string OptionsColor { get; set; }
-    }
-
     public class ThemeEntity : TableEntity
     {
-        public ThemeEntity(string author, string title, Dictionary<string, string> themeContent)
+        public ThemeEntity(string author, string title, bool online, Dictionary<string, string> themeContent)
         {
             PartitionKey = author;
             RowKey = title;
+            Online = online;
             ThemeContent = themeContent;
         }
 
@@ -38,6 +24,7 @@ namespace MetroStart
 
         public string Author => PartitionKey;
         public string Title => RowKey;
+        public bool Online { get; set; }
         public Dictionary<string, string> ThemeContent { get; set; }
 
         public static async Task<CloudTable> GetCloudTable(ILogger log)
@@ -56,6 +43,49 @@ namespace MetroStart
             }
 
             throw new ApplicationException("Could not find connectionString.");
+        }
+
+        public static ThemeEntity CreateThemeEntity(IDictionary<string, string> flatTheme)
+        {
+            string author = null;
+            string title = null;
+            bool? online = null;
+            Dictionary<string, string> themeContent = new Dictionary<string, string>();
+            foreach (var (Key, Value) in flatTheme)
+            {
+                if (Key.Equals("author", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    author = Value;
+                }
+                else if (Key.Equals("title", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    title = Value;
+                }
+                else if (Key.Equals("online", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    online = bool.Parse(Value);
+                }
+                else
+                {
+                    themeContent.Add(Key, Value);
+                }
+            }
+
+            _ = author.Nullable() ?? throw new ArgumentNullException(nameof(author));
+            _ = title.Nullable() ?? throw new ArgumentNullException(nameof(title));
+            _ = online ?? throw new ArgumentNullException(nameof(online));
+
+            return new ThemeEntity(author, title, online.Value, themeContent);
+        }
+
+        public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, ILogger log)
+        {
+            var table = await ThemeEntity.GetCloudTable(log);
+            TableOperation insertOperation = TableOperation.Insert(themeEntity);
+
+            // Execute the insert operation.
+            log.LogDebug($"Saving new theme with author: {themeEntity.Author}, title: {themeEntity.Title}");
+            return (await table.ExecuteAsync(insertOperation))?.Result as ThemeEntity ?? throw new InvalidDataException("Element was not cahced");
         }
 
         public static async Task<List<ThemeEntity>> GetAllThemes(ILogger log)

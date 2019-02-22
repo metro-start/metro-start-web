@@ -21,47 +21,14 @@ namespace MetroStart
             ILogger log)
         {
 
-            string author = null;
-            string title = null;
-            Dictionary<string, string> themeContent = new Dictionary<string, string>();
-            foreach (var (Key, Value) in req.GetQueryParameterDictionary())
-            {
-                if (Key.Equals("author", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    author = Value;
-                }
-                else if (Key.Equals("title", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    title = Value;
-                }
-                else
-                {
-                    themeContent.Add(Key, Value);
-                }
-            }
-
-            _ = author.Nullable() ?? throw new ArgumentNullException(nameof(author));
-            _ = title.Nullable() ?? throw new ArgumentNullException(nameof(title));
-
-            if (await ThemeEntity.ThemeExists(title, log))
+            var themeEntity = ThemeEntity.CreateThemeEntity(req.GetQueryParameterDictionary());
+            if (await ThemeEntity.ThemeExists(themeEntity.Title, log))
             {
                 return new ConflictResult();
             }
 
-            await InsertTheme(author, title, themeContent, log);
+            await ThemeEntity.InsertTheme(themeEntity, log);
             return new OkResult();
-        }
-
-        static async Task<ThemeEntity> InsertTheme(string author, string title, Dictionary<string, string> themeContent, ILogger log)
-        {
-            var table = await ThemeEntity.GetCloudTable(log);
-
-            var weatherEntity = new ThemeEntity(author, title, themeContent);
-            TableOperation insertOperation = TableOperation.Insert(weatherEntity);
-
-            // Execute the insert operation.
-            log.LogDebug($"Saving new theme with author: {author}, title: {title}");
-            return (await table.ExecuteAsync(insertOperation))?.Result as ThemeEntity ?? throw new InvalidDataException("Element was not cahced");
         }
     }
 }
