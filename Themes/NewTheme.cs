@@ -27,7 +27,8 @@ namespace MetroStart
                 return new ConflictResult();
             }
 
-            await ThemeEntity.InsertTheme(themeEntity, log);
+            var table = await ThemeEntity.GetCloudTable(log);
+            await ThemeEntity.InsertTheme(themeEntity, table, log);
             return new OkResult();
         }
     }

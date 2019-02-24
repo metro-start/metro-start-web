@@ -4,6 +4,7 @@ using MetroStart.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 
 namespace MetroStart.Models
 {
@@ -24,16 +25,21 @@ namespace MetroStart.Models
 
         public string Location => RowKey;
         public string Units => PartitionKey;
-        public TimeSpan Age => DateTime.Now - CreationDate;
-        public DateTime CreationDate { get; set; }
-        public OpenWeatherResponse WeatherResponse { get; set; }
 
+        public DateTime CreationDate { get; set; }
+        public TimeSpan Age => DateTime.Now - CreationDate;
+
+        public string WeatherResponseJson { get; set; }
+        public OpenWeatherResponse WeatherResponse
+        {
+            get => JsonConvert.DeserializeObject<OpenWeatherResponse>(WeatherResponseJson);
+            set => WeatherResponseJson = JsonConvert.SerializeObject(value);
+        }
 
         public static async Task<CloudTable> GetCloudTable(ILogger log)
         {
             if (System.Environment.GetEnvironmentVariable("METROSTART_TABLE_CONNECTION_STRING", EnvironmentVariableTarget.Process) is var connectionString)
             {
-                log.LogInformation($"ConnectionString: {connectionString}");
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
                 CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
                 CloudTable table = tableClient.GetTableReference("weather");

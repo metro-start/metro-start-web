@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MetroStart
 {
@@ -19,7 +20,17 @@ namespace MetroStart
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            return new OkObjectResult(JsonConvert.SerializeObject(await ThemeEntity.GetAllThemes(log)));
+            var themes = await ThemeEntity.GetAllThemes(log);
+
+            return new OkObjectResult(
+                JsonConvert.SerializeObject(
+                    themes.Select(t => new
+                    {
+                        t.Author,
+                        t.Title,
+                        t.Online,
+                        t.ThemeContent
+                    })));
         }
     }
 }

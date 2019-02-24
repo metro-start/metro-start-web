@@ -10,30 +10,32 @@ using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Linq;
 
 namespace MetroStart
 {
     public static class LoadThemes
     {
-        [FunctionName("_loadthemes")]
+        [FunctionName("loadthemes")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var themes = await GetThemesFromGoogle(log);
-            foreach (var theme in themes)
+            var table = await ThemeEntity.GetCloudTable(log);
+            var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeEntity.CreateThemeEntity(t));
+            foreach (var themeEntity in themeEntities)
             {
-                var themeEntity = ThemeEntity.CreateThemeEntity(theme);
-                if (await ThemeEntity.ThemeExists(themeEntity.Title, log))
+                try
                 {
-                    return new ConflictResult();
+                    await ThemeEntity.InsertTheme(themeEntity, table, log);
                 }
-
-                await ThemeEntity.InsertTheme(themeEntity, log);
-                return new OkResult();
+                catch (Exception e)
+                {
+                    log.LogDebug($"Exception saving theme {themeEntity}: {e}");
+                }
             }
 
-            return new OkObjectResult(JsonConvert.SerializeObject(themes));
+            return new OkObjectResult(JsonConvert.SerializeObject(themeEntities));
         }
 
         static async Task<List<Dictionary<string, string>>> GetThemesFromGoogle(ILogger log)

@@ -58,12 +58,10 @@ namespace MetroStart
                     log.LogDebug($"Returning cached weather response: {weatherEntity.CreationDate}");
                     return weatherEntity;
                 }
-                else
-                {
-                    var deleteOp = TableOperation.Delete(weatherEntity);
-                    TableResult deleteRes = await table.ExecuteAsync(deleteOp);
-                    log.LogInformation($"Removed expired weather with location: {location}, units: {units}, age: {weatherEntity.Age}");
-                }
+
+                var deleteOp = TableOperation.Delete(weatherEntity);
+                TableResult deleteRes = await table.ExecuteAsync(deleteOp);
+                log.LogInformation($"Removed expired weather with location: {location}, units: {units}, age: {weatherEntity.Age}");
             }
 
             return null;
@@ -78,7 +76,7 @@ namespace MetroStart
 
             // Execute the insert operation.
             log.LogDebug($"Caching current weather with location: {location}, units: {units}");
-            return (await table.ExecuteAsync(insertOperation))?.Result as WeatherEntity ?? throw new InvalidDataException("Element was not cahced");
+            return (await table.ExecuteAsync(insertOperation))?.Result as WeatherEntity ?? throw new InvalidDataException("Element was not cached");
         }
     }
 }

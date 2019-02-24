@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 
 namespace MetroStart
 {
@@ -25,16 +27,22 @@ namespace MetroStart
         public string Author => PartitionKey;
         public string Title => RowKey;
         public bool Online { get; set; }
-        public Dictionary<string, string> ThemeContent { get; set; }
+        public string ThemeContentJson { get; set; }
+        public Dictionary<string, string> ThemeContent
+        {
+            get => JsonConvert.DeserializeObject<Dictionary<string, string>>(ThemeContentJson);
+            set => ThemeContentJson = JsonConvert.SerializeObject(value);
+        }
+
+        public override string ToString() => $"(Author: {Author}, Title: {Title})";
 
         public static async Task<CloudTable> GetCloudTable(ILogger log)
         {
             if (System.Environment.GetEnvironmentVariable("METROSTART_TABLE_CONNECTION_STRING", EnvironmentVariableTarget.Process) is var connectionString)
             {
-                log.LogInformation($"ConnectionString: {connectionString}");
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
                 CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-                CloudTable table = tableClient.GetTableReference("theme");
+                CloudTable table = tableClient.GetTableReference("themes");
 
                 // Create the table if it doesn't exist.
                 await table.CreateIfNotExistsAsync();
@@ -49,7 +57,7 @@ namespace MetroStart
         {
             string author = null;
             string title = null;
-            bool? online = null;
+            bool online = true;
             Dictionary<string, string> themeContent = new Dictionary<string, string>();
             foreach (var (Key, Value) in flatTheme)
             {
@@ -63,7 +71,10 @@ namespace MetroStart
                 }
                 else if (Key.Equals("online", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    online = bool.Parse(Value);
+                    if (!bool.TryParse(Value, out online))
+                    {
+                        online = true;
+                    }
                 }
                 else
                 {
@@ -73,19 +84,17 @@ namespace MetroStart
 
             _ = author.Nullable() ?? throw new ArgumentNullException(nameof(author));
             _ = title.Nullable() ?? throw new ArgumentNullException(nameof(title));
-            _ = online ?? throw new ArgumentNullException(nameof(online));
 
-            return new ThemeEntity(author, title, online.Value, themeContent);
+            return new ThemeEntity(author, title, online, themeContent);
         }
 
-        public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, ILogger log)
+        public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, CloudTable table, ILogger log)
         {
-            var table = await ThemeEntity.GetCloudTable(log);
             TableOperation insertOperation = TableOperation.Insert(themeEntity);
 
             // Execute the insert operation.
-            log.LogDebug($"Saving new theme with author: {themeEntity.Author}, title: {themeEntity.Title}");
-            return (await table.ExecuteAsync(insertOperation))?.Result as ThemeEntity ?? throw new InvalidDataException("Element was not cahced");
+            log.LogDebug($"Saving new theme {themeEntity}");
+            return (await table.ExecuteAsync(insertOperation))?.Result as ThemeEntity ?? throw new InvalidDataException($"Theme {themeEntity} was not saved");
         }
 
         public static async Task<List<ThemeEntity>> GetAllThemes(ILogger log)
@@ -101,7 +110,6 @@ namespace MetroStart
                 tableToken = segment.ContinuationToken;
             } while (tableToken != null);
 
-            log.LogDebug($"Returning cached weather response: {results.Count}");
             return results;
         }
 
