@@ -27,25 +27,33 @@ namespace MetroStart.Weather
             TableOperation insertOperation = TableOperation.InsertOrReplace(weather);
 
             var result = await table.ExecuteAsync(insertOperation);
-            log.LogDebug($"Caching current weather with location: {weather.Location}, units: {weather.Units} with result: {result.HttpStatusCode}");
+            log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} with result: {result.HttpStatusCode}");
         }
 
-        public static async Task UpdateCurrentWeather(WeatherEntity weather, string location, string units, ILogger log)
+        public static async Task<bool> UpdateCurrentWeather(WeatherEntity weather, string location, string units, ILogger log)
         {
-            if (weather.WeatherForecastAge > TimeSpan.FromHours(3))
+            log.LogInformation($"Updating current weather: {location}, forecast age: {weather.CurrentWeatherAge}");
+            if (weather.CurrentWeather == null || weather.CurrentWeatherAge > TimeSpan.FromHours(3))
             {
                 weather.CurrentWeather = await GetCurrentWeather(location, units, log);
                 weather.CurrentWeatherModified = DateTime.Now;
+                return true;
             }
+
+            return false;
         }
 
-        public static async Task UpdateWeatherForecast(WeatherEntity weather, string location, string units, ILogger log)
+        public static async Task<bool> UpdateWeatherForecast(WeatherEntity weather, string location, string units, ILogger log)
         {
-            if (weather.WeatherForecastAge > TimeSpan.FromHours(9))
+            log.LogInformation($"Updating weather forecast: {location}, forecast age: {weather.WeatherForecastAge}, created: {weather.WeatherForecastModified}");
+            if (weather.WeatherForecast == null || weather.WeatherForecastAge > TimeSpan.FromHours(9))
             {
                 weather.WeatherForecast = await GetWeatherForecast(location, units, log);
                 weather.WeatherForecastModified = DateTime.Now;
+                return true;
             }
+
+            return false;
         }
 
         public static async Task<CurrentWeatherResponse> GetCurrentWeather(string location, string units, ILogger log)
@@ -57,7 +65,7 @@ namespace MetroStart.Weather
             }
             catch (Exception e)
             {
-                log.LogDebug(e, "Could not get current weather.");
+                log.LogInformation(e, "Could not get current weather.");
                 return null;
             }
         }
@@ -66,12 +74,12 @@ namespace MetroStart.Weather
         {
             try
             {
-                var responseText = await MakeOpenWeatherResponse($"forecast/daily?q={location}&units={units}&cnt={ForecastDays}", log);
+                var responseText = await MakeOpenWeatherResponse($"forecast?q={location}&units={units}", log);
                 return WeatherForecastResponse.FromJson(responseText);
             }
             catch (Exception e)
             {
-                log.LogDebug(e, "Could not get weather forecast.");
+                log.LogInformation(e, "Could not get weather forecast.");
                 return null;
             }
         }
@@ -82,7 +90,7 @@ namespace MetroStart.Weather
             ?? throw new ArgumentNullException("WEATHER_API_KEY");
 
             var weatherUrl = $"https://api.openweathermap.org/data/2.5/{urlAction}";
-            log.LogDebug($"Requesting weatherUrl: {weatherUrl}");
+            log.LogInformation($"Requesting weatherUrl: {weatherUrl}&APPID={weatherKey}");
 
             var response = await Client.GetAsync($"{weatherUrl}&APPID={weatherKey}");
             response.EnsureSuccessStatusCode();

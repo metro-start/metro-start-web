@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace MetroStart.Entities
 {
-   public class  WeatherEntity : TableEntity
+    public class WeatherEntity : TableEntity
     {
         public WeatherEntity(string location, string units, CurrentWeatherResponse currentWeather, WeatherForecastResponse weatherForecast)
         {
@@ -33,7 +33,7 @@ namespace MetroStart.Entities
         public TimeSpan CurrentWeatherAge => DateTime.Now - CurrentWeatherModified;
 
         public DateTime WeatherForecastModified { get; set; }
-        public TimeSpan WeatherForecastAge => DateTime.Now - CurrentWeatherModified;
+        public TimeSpan WeatherForecastAge => DateTime.Now - WeatherForecastModified;
 
         public string CurrentWeatherJson { get; set; }
         public CurrentWeatherResponse CurrentWeather
@@ -46,7 +46,7 @@ namespace MetroStart.Entities
         public WeatherForecastResponse WeatherForecast
         {
             get => WeatherForecastResponse.FromJson(WeatherForecastJson);
-            set => WeatherForecastJson =value.ToJson();
+            set => WeatherForecastJson = value?.ToJson() ?? string.Empty;
         }
 
         public static async Task<CloudTable> GetCloudTable(ILogger log)

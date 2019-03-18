@@ -63,26 +63,40 @@ namespace MetroStart.Weather.Respnoses
         [JsonProperty("dt")]
         public long Dt { get; set; }
 
-        [JsonProperty("temp")]
-        public Temp Temp { get; set; }
-
-        [JsonProperty("pressure")]
-        public double Pressure { get; set; }
-
-        [JsonProperty("humidity")]
-        public long Humidity { get; set; }
+        [JsonProperty("main")]
+        public Main Main { get; set; }
 
         [JsonProperty("weather")]
         public Weather[] Weather { get; set; }
 
         [JsonProperty("speed")]
-        public long? Speed { get; internal set; }
+        public Wind Wind { get; internal set; }
 
         [JsonProperty("rain")]
-        public long? Rain { get; internal set; }
+        public Rain Rain { get; internal set; }
 
         [JsonProperty("snow")]
-        public long? Snow { get; internal set; }
+        public Snow Snow { get; internal set; }
+    }
+
+    public class Wind
+    {
+        [JsonProperty("speed")]
+        public long Speed { get; set; }
+        [JsonProperty("deg")]
+        public long Deg { get; set; }
+    }
+
+    public class Snow
+    {
+        [JsonProperty("3h")]
+        public long ThreeHours { get; set; }
+    }
+
+    public class Rain
+    {
+        [JsonProperty("3h")]
+        public long ThreeHours { get; set; }
     }
 
     public class Temp

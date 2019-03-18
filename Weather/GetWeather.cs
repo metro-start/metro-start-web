@@ -20,39 +20,52 @@ namespace MetroStart.Weather
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            string location = req.Query["location"].ToString() ?? throw new ArgumentNullException(nameof(location));
-            string units = req.Query["units"].ToString() ?? throw new ArgumentNullException(nameof(units));
-
-            List<Task> updateTasks = new List<Task>();
-            WeatherEntity weather = await WeatherHelpers.GetCachedWeather(location, units, log);
-            updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateCurrentWeather(weather, location, units, log)));
-            updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateWeatherForecast(weather, location, units, log)));
-
-            if (updateTasks.Any())
+            try
             {
-                await Task.WhenAll(updateTasks);
-                await WeatherHelpers.CacheWeather(weather, log);
+                string location = req.Query["location"].ToString() ?? throw new ArgumentNullException(nameof(location));
+                string units = req.Query["units"].ToString() ?? throw new ArgumentNullException(nameof(units));
+
+                List<Task<bool>> updateTasks = new List<Task<bool>>();
+                WeatherEntity weather = await WeatherHelpers.GetCachedWeather(location, units, log);
+                updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateCurrentWeather(weather, location, units, log)));
+                updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateWeatherForecast(weather, location, units, log)));
+
+                if ((await Task.WhenAll(updateTasks)).Any(res => res))
+                {
+                    await WeatherHelpers.CacheWeather(weather, log);
+                }
+
+                WeatherList firstForecast = weather.WeatherForecast?.WeatherList?.FirstOrDefault();
+                return new OkObjectResult(new
+                {
+                    // Location
+                    weather.CurrentWeather.Name,
+                    weather.CurrentWeather.Sys.Country,
+
+                    // Temperatures
+                    weather.CurrentWeather.Main.Temp,
+                    firstForecast.Main.TempMax,
+                    firstForecast.Main.TempMin,
+                    weather.Units,
+
+                    // Conditions
+                    weather.CurrentWeather.Weather?.FirstOrDefault()?.Description,
+                    WindSpeed = firstForecast.Wind?.Speed ?? 0,
+                    WindDeg = firstForecast.Wind?.Deg ?? 0,
+                    Rain3h = firstForecast.Rain?.ThreeHours ?? 0,
+                    Snow3h = firstForecast.Snow?.ThreeHours ?? 0,
+
+                    // Ages
+                    EntityAgeHours = (DateTime.Now - weather.Timestamp).TotalMinutes,
+                    CurrentWeatherAgeHours = weather.CurrentWeatherAge.TotalMinutes,
+                    WeatherForecastAgeHours = weather.WeatherForecastAge.TotalMinutes
+                });
             }
-
-            WeatherList firstForecast = weather.WeatherForecast.WeatherList?.FirstOrDefault();
-            return new OkObjectResult(new
+            catch (Exception e)
             {
-                // Location
-                weather.CurrentWeather.Name,
-                weather.CurrentWeather.Sys.Country,
-
-                // Temperatures
-                weather.CurrentWeather.Main.Temp,
-                firstForecast?.Temp.Max,
-                firstForecast?.Temp.Min,
-                weather.Units,
-
-                // Conditions
-                weather.CurrentWeather.Weather?.FirstOrDefault()?.Description,
-                firstForecast?.Speed,
-                firstForecast?.Rain,
-                firstForecast?.Snow
-            });
+                log.LogWarning(e, $"Exception! {e.Message}! {e.StackTrace}");
+                throw e;
+            }
         }
 
     }
