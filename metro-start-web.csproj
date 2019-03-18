@@ -5,9 +5,9 @@
     <RootNamespace>metro_start_web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24"/>
-    <PackageReference Include="Microsoft.Azure.CosmosDB.Table" Version="2.1.0"/>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1"/>
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
+    <PackageReference Include="Microsoft.Azure.CosmosDB.Table" Version="2.1.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -17,5 +17,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Weather\Models\" />
+    <Folder Include="Weather\Responses\" />
+    <Folder Include="Weather\Entities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Weather\Entities\CurrentWeatherEntity %28copy%29.cs" />
   </ItemGroup>
 </Project>

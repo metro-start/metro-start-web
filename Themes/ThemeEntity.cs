@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MetroStart
 {
-    public class ThemeEntity : TableEntity
+   public class  ThemeEntity : TableEntity
     {
         public ThemeEntity(string author, string title, bool online, Dictionary<string, string> themeContent)
         {
