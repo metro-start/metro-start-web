@@ -7,13 +7,14 @@ using MetroStart.Weather.Respnoses;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace MetroStart.Weather
+namespace MetroStart.Helpers
 {
     public static class WeatherHelpers
     {
         public static int ForecastDays = 3;
         public static HttpClient Client { get; } = new HttpClient();
 
+        // Gets the weather entity cached with the provided location and units.
         public static async Task<WeatherEntity> GetCachedWeather(string location, string units, ILogger log)
         {
             var table = await WeatherEntity.GetCloudTable(log);
@@ -31,47 +32,20 @@ namespace MetroStart.Weather
             log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} and mod dates:({weather.WeatherForecastModified.ToLongTimeString()}, {weather.CurrentWeatherModified.ToLongTimeString()}) with result: {result.HttpStatusCode}");
         }
 
-        // Tries to update the current weather.
-        // returns: True if the current weather was updated, false if it does not require updating.
-        public static async Task<bool> UpdateCurrentWeather(WeatherEntity weather, ILogger log)
-        {
-            if (weather.CurrentWeather == null || weather.CurrentWeatherAge > TimeSpan.FromHours(3))
-            {
-                if (await GetCurrentWeather(weather.Location, weather.Units, log) is CurrentWeatherResponse currentWeather)
-                {
-                    weather.CurrentWeather = await GetCurrentWeather(weather.Location, weather.Units, log);
-                    return true;
-                }
-                else
-                {
-                    log.LogInformation("Could not get the current weather information.");
-                }
-            }
+        // Checks if the provided weatherEntity's currnet weather should be updated.
+        // returns: True if the current wether should be updated, false if it does not require updating.
+        public static bool CurrentWeatherRequiresUpdate(WeatherEntity weather) => weather.CurrentWeather == null || weather.CurrentWeatherAge > TimeSpan.FromHours(3);
 
-            log.LogInformation($"Current weather does not reqiure updating. Age: {weather.CurrentWeatherAge.ToHumanReadableString()}");
-            return false;
-        }
-
-        // Tries to update the weather forecast.
-        // returns: True if the weather forecast was updated, false if it does not require updating.
-        public static async Task<bool> UpdateWeatherForecast(WeatherEntity weather, ILogger log)
-        {
-            if (weather.WeatherForecast == null || weather.WeatherForecastAge > TimeSpan.FromHours(9))
-            {
-                weather.WeatherForecast = await GetWeatherForecast(weather.Location, weather.Units, log);
-                return true;
-            }
-
-            log.LogInformation($"Weather forecast does not reqiure updating. Age: {weather.WeatherForecastAge.ToHumanReadableString()}");
-            return false;
-        }
+        // Checks if the provided weatherEntity's forecast should be updated.
+        // returns: True if the weather forecast should be updated, false if it does not require updating.
+        public static bool WeatherForecastRequiresUpdate(WeatherEntity weather) => weather.WeatherForecast == null || weather.WeatherForecastAge > TimeSpan.FromHours(9);
 
         // Gets the current weather from the remote service.
         // returns: The current weather response.
         public static async Task<CurrentWeatherResponse> GetCurrentWeather(string location, string units, ILogger log)
         {
             var responseText = await MakeOpenWeatherResponse($"weather?q={location}&units={units}", log);
-            return CurrentWeatherResponse.FromJson(responseText);
+            return CurrentWeatherResponse.FromJson(responseText) ?? throw new Exception($"No current weather response was found for location: {location}, units: {units}.");
         }
 
         // Gets the weather forecast from the remote service.
@@ -79,7 +53,7 @@ namespace MetroStart.Weather
         public static async Task<WeatherForecastResponse> GetWeatherForecast(string location, string units, ILogger log)
         {
             var responseText = await MakeOpenWeatherResponse($"forecast?q={location}&units={units}", log);
-            return WeatherForecastResponse.FromJson(responseText);
+            return WeatherForecastResponse.FromJson(responseText) ?? throw new Exception($"No weather forecast response was found for location: {location}, units: {units}.");
         }
 
         // Make a request for weather data from OpenWeatherMap.

@@ -10,6 +10,7 @@ using MetroStart.Entities;
 using MetroStart.Weather.Respnoses;
 using System.Collections.Generic;
 using System.Linq;
+using MetroStart.Helpers;
 
 namespace MetroStart.Weather
 {
@@ -29,15 +30,55 @@ namespace MetroStart.Weather
                 WeatherEntity weather = await WeatherHelpers.GetCachedWeather(location, units, log)
                                         ?? new WeatherEntity(location, units, null, null);
 
-                updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateCurrentWeather(weather, location, units, log)));
-                updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateWeatherForecast(weather, location, units, log)));
+                updateTasks.Add(Task.Run(async () =>
+                {
+                    if (WeatherHelpers.CurrentWeatherRequiresUpdate(weather))
+                    {
+                        try
+                        {
+                            weather.CurrentWeather = await WeatherHelpers.GetCurrentWeather(location, units, log);
+                            weather.CurrentWeatherModified = DateTime.Now;
+                            return true;
+                        }
+                        catch (Exception e)
+                        {
+                            log.LogError(e, $"Could not update the current weather for: {location}, {units}");
+                        }
+                    }
+                    else
+                    {
+                        log.LogInformation($"Current weather update not required for: {location}, {units}");
+                    }
+                    return false;
+                }));
+                updateTasks.Add(Task.Run(async () =>
+                {
+                    if (WeatherHelpers.WeatherForecastRequiresUpdate(weather))
+                    {
+                        try
+                        {
+                            weather.WeatherForecast = await WeatherHelpers.GetWeatherForecast(location, units, log);
+                            weather.WeatherForecastModified = DateTime.Now;
+                            return true;
+                        }
+                        catch (Exception e)
+                        {
+                            log.LogError(e, $"Could not update the weather forecast for: {location}, {units}");
+                        }
+                    }
+                    else
+                    {
+                        log.LogInformation($"Weather forecast update not required for: {location}, {units}");
+                    }
+                    return false;
+                }));
 
                 if ((await Task.WhenAll(updateTasks)).Any(res => res))
                 {
                     await WeatherHelpers.CacheWeather(weather, log);
                 }
 
-                WeatherList firstForecast = weather.WeatherForecast?.WeatherList?.FirstOrDefault();
+                var firstForecast = weather.WeatherForecast?.WeatherList?.FirstOrDefault();
                 return new OkObjectResult(new
                 {
                     // Location
@@ -52,10 +93,10 @@ namespace MetroStart.Weather
 
                     // Conditions
                     weather.CurrentWeather.Weather?.FirstOrDefault()?.Description,
-                    WindSpeed = firstForecast.Wind?.Speed ?? 0,
-                    WindDeg = firstForecast.Wind?.Deg ?? 0,
-                    Rain3h = firstForecast.Rain?.ThreeHours ?? 0,
-                    Snow3h = firstForecast.Snow?.ThreeHours ?? 0,
+                    WindSpeed = firstForecast?.Wind?.Speed ?? 0,
+                    WindDeg = firstForecast?.Wind?.Deg ?? 0,
+                    Rain3h = firstForecast?.Rain?.ThreeHours ?? 0,
+                    Snow3h = firstForecast?.Snow?.ThreeHours ?? 0,
 
                     // Ages
                     EntityAge = (DateTime.Now - weather.Timestamp.ToLocalTime()).ToHumanReadableString(),

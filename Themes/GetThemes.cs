@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Linq;
+using MetroStart.Entities;
+using MetroStart.Helpers;
 
 namespace MetroStart
 {
@@ -20,7 +22,7 @@ namespace MetroStart
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var themes = await ThemeEntity.GetAllThemes(log);
+            var themes = await ThemeHelpers.GetAllThemes(log);
 
             return new OkObjectResult(
                 JsonConvert.SerializeObject(

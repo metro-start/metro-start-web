@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Linq;
+using MetroStart.Entities;
+using MetroStart.Helpers;
 
 namespace MetroStart
 {
@@ -21,14 +23,14 @@ namespace MetroStart
             ILogger log)
         {
 
-            var themeEntity = ThemeEntity.CreateThemeEntity(req.GetQueryParameterDictionary());
-            if (await ThemeEntity.ThemeExists(themeEntity.Title, log))
+            var themeEntity = ThemeHelpers.CreateThemeEntity(req.GetQueryParameterDictionary());
+            if (await ThemeHelpers.ThemeExists(themeEntity.Title, log))
             {
                 return new ConflictResult();
             }
 
-            var table = await ThemeEntity.GetCloudTable(log);
-            await ThemeEntity.InsertTheme(themeEntity, table, log);
+            var table = await ThemeHelpers.GetCloudTable(log);
+            await ThemeHelpers.InsertTheme(themeEntity, table, log);
             return new OkResult();
         }
     }

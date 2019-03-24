@@ -11,6 +11,8 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Linq;
+using MetroStart.Entities;
+using MetroStart.Helpers;
 
 namespace MetroStart
 {
@@ -21,13 +23,13 @@ namespace MetroStart
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var table = await ThemeEntity.GetCloudTable(log);
-            var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeEntity.CreateThemeEntity(t));
+            var table = await ThemeHelpers.GetCloudTable(log);
+            var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeHelpers.CreateThemeEntity(t));
             foreach (var themeEntity in themeEntities)
             {
                 try
                 {
-                    await ThemeEntity.InsertTheme(themeEntity, table, log);
+                    await ThemeHelpers.InsertTheme(themeEntity, table, log);
                 }
                 catch (Exception e)
                 {
