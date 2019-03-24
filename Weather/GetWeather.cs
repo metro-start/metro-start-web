@@ -26,7 +26,9 @@ namespace MetroStart.Weather
                 string units = req.Query["units"].ToString() ?? throw new ArgumentNullException(nameof(units));
 
                 List<Task<bool>> updateTasks = new List<Task<bool>>();
-                WeatherEntity weather = await WeatherHelpers.GetCachedWeather(location, units, log);
+                WeatherEntity weather = await WeatherHelpers.GetCachedWeather(location, units, log)
+                                        ?? new WeatherEntity(location, units, null, null);
+
                 updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateCurrentWeather(weather, location, units, log)));
                 updateTasks.Add(Task.Run(async () => await WeatherHelpers.UpdateWeatherForecast(weather, location, units, log)));
 
@@ -56,9 +58,9 @@ namespace MetroStart.Weather
                     Snow3h = firstForecast.Snow?.ThreeHours ?? 0,
 
                     // Ages
-                    EntityAgeHours = (DateTime.Now - weather.Timestamp).TotalMinutes,
-                    CurrentWeatherAgeHours = weather.CurrentWeatherAge.TotalMinutes,
-                    WeatherForecastAgeHours = weather.WeatherForecastAge.TotalMinutes
+                    EntityAge = (DateTime.Now - weather.Timestamp.ToLocalTime()).ToHumanReadableString(),
+                    CurrentWeatherAge = weather.CurrentWeatherAge.ToHumanReadableString(),
+                    WeatherForecastAge = weather.WeatherForecastAge.ToHumanReadableString()
                 });
             }
             catch (Exception e)

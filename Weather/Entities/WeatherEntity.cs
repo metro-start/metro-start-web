@@ -19,7 +19,7 @@ namespace MetroStart.Entities
             CurrentWeatherModified = DateTime.Now;
 
             WeatherForecast = weatherForecast;
-            CurrentWeatherModified = DateTime.Now;
+            WeatherForecastModified = DateTime.Now;
         }
 
         public WeatherEntity()
@@ -39,14 +39,22 @@ namespace MetroStart.Entities
         public CurrentWeatherResponse CurrentWeather
         {
             get => CurrentWeatherResponse.FromJson(CurrentWeatherJson);
-            set => CurrentWeatherJson = value.ToJson();
+            set
+            {
+                CurrentWeatherJson = value?.ToJson() ?? string.Empty;
+                CurrentWeatherModified = DateTime.Now;
+            }
         }
 
         public string WeatherForecastJson { get; set; }
         public WeatherForecastResponse WeatherForecast
         {
             get => WeatherForecastResponse.FromJson(WeatherForecastJson);
-            set => WeatherForecastJson = value?.ToJson() ?? string.Empty;
+            set
+            {
+                WeatherForecastJson = value?.ToJson() ?? string.Empty;
+                WeatherForecastModified = DateTime.Now;
+            }
         }
 
         public static async Task<CloudTable> GetCloudTable(ILogger log)

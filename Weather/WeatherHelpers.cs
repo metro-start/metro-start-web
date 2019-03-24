@@ -21,76 +21,75 @@ namespace MetroStart.Weather
             return retrievedResult?.Result as WeatherEntity;
         }
 
+        // Save the weather entity.
         public static async Task CacheWeather(WeatherEntity weather, ILogger log)
         {
             var table = await WeatherEntity.GetCloudTable(log);
             TableOperation insertOperation = TableOperation.InsertOrReplace(weather);
 
             var result = await table.ExecuteAsync(insertOperation);
-            log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} with result: {result.HttpStatusCode}");
+            log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} and mod dates:({weather.WeatherForecastModified.ToLongTimeString()}, {weather.CurrentWeatherModified.ToLongTimeString()}) with result: {result.HttpStatusCode}");
         }
 
-        public static async Task<bool> UpdateCurrentWeather(WeatherEntity weather, string location, string units, ILogger log)
+        // Tries to update the current weather.
+        // returns: True if the current weather was updated, false if it does not require updating.
+        public static async Task<bool> UpdateCurrentWeather(WeatherEntity weather, ILogger log)
         {
-            log.LogInformation($"Updating current weather: {location}, forecast age: {weather.CurrentWeatherAge}");
             if (weather.CurrentWeather == null || weather.CurrentWeatherAge > TimeSpan.FromHours(3))
             {
-                weather.CurrentWeather = await GetCurrentWeather(location, units, log);
-                weather.CurrentWeatherModified = DateTime.Now;
-                return true;
+                if (await GetCurrentWeather(weather.Location, weather.Units, log) is CurrentWeatherResponse currentWeather)
+                {
+                    weather.CurrentWeather = await GetCurrentWeather(weather.Location, weather.Units, log);
+                    return true;
+                }
+                else
+                {
+                    log.LogInformation("Could not get the current weather information.");
+                }
             }
 
+            log.LogInformation($"Current weather does not reqiure updating. Age: {weather.CurrentWeatherAge.ToHumanReadableString()}");
             return false;
         }
 
-        public static async Task<bool> UpdateWeatherForecast(WeatherEntity weather, string location, string units, ILogger log)
+        // Tries to update the weather forecast.
+        // returns: True if the weather forecast was updated, false if it does not require updating.
+        public static async Task<bool> UpdateWeatherForecast(WeatherEntity weather, ILogger log)
         {
-            log.LogInformation($"Updating weather forecast: {location}, forecast age: {weather.WeatherForecastAge}, created: {weather.WeatherForecastModified}");
             if (weather.WeatherForecast == null || weather.WeatherForecastAge > TimeSpan.FromHours(9))
             {
-                weather.WeatherForecast = await GetWeatherForecast(location, units, log);
-                weather.WeatherForecastModified = DateTime.Now;
+                weather.WeatherForecast = await GetWeatherForecast(weather.Location, weather.Units, log);
                 return true;
             }
 
+            log.LogInformation($"Weather forecast does not reqiure updating. Age: {weather.WeatherForecastAge.ToHumanReadableString()}");
             return false;
         }
 
+        // Gets the current weather from the remote service.
+        // returns: The current weather response.
         public static async Task<CurrentWeatherResponse> GetCurrentWeather(string location, string units, ILogger log)
         {
-            try
-            {
-                var responseText = await MakeOpenWeatherResponse($"weather?q={location}&units={units}", log);
-                return CurrentWeatherResponse.FromJson(responseText);
-            }
-            catch (Exception e)
-            {
-                log.LogInformation(e, "Could not get current weather.");
-                return null;
-            }
+            var responseText = await MakeOpenWeatherResponse($"weather?q={location}&units={units}", log);
+            return CurrentWeatherResponse.FromJson(responseText);
         }
 
+        // Gets the weather forecast from the remote service.
+        // returns: The weather forecast response.
         public static async Task<WeatherForecastResponse> GetWeatherForecast(string location, string units, ILogger log)
         {
-            try
-            {
-                var responseText = await MakeOpenWeatherResponse($"forecast?q={location}&units={units}", log);
-                return WeatherForecastResponse.FromJson(responseText);
-            }
-            catch (Exception e)
-            {
-                log.LogInformation(e, "Could not get weather forecast.");
-                return null;
-            }
+            var responseText = await MakeOpenWeatherResponse($"forecast?q={location}&units={units}", log);
+            return WeatherForecastResponse.FromJson(responseText);
         }
 
+        // Make a request for weather data from OpenWeatherMap.
         public static async Task<string> MakeOpenWeatherResponse(string urlAction, ILogger log)
         {
             var weatherKey = System.Environment.GetEnvironmentVariable("WEATHER_API_KEY", EnvironmentVariableTarget.Process).Nullable()
             ?? throw new ArgumentNullException("WEATHER_API_KEY");
 
             var weatherUrl = $"https://api.openweathermap.org/data/2.5/{urlAction}";
-            log.LogInformation($"Requesting weatherUrl: {weatherUrl}&APPID={weatherKey}");
+            log.LogInformation($"Requesting weatherUrl: {weatherUrl}");
 
             var response = await Client.GetAsync($"{weatherUrl}&APPID={weatherKey}");
             response.EnsureSuccessStatusCode();
