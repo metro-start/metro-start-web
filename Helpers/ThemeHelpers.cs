@@ -11,7 +11,6 @@ namespace MetroStart.Helpers
 {
     public static class ThemeHelpers
     {
-
         public static async Task<CloudTable> GetCloudTable(ILogger log)
         {
             if (System.Environment.GetEnvironmentVariable("METROSTART_TABLE_CONNECTION_STRING", EnvironmentVariableTarget.Process) is var connectionString)
