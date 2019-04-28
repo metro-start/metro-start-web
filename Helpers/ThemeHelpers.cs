@@ -29,7 +29,7 @@ namespace MetroStart.Helpers
             throw new ApplicationException("Could not find connectionString.");
         }
 
-        public static ThemeEntity CreateThemeEntity(IDictionary<string, string> flatTheme)
+        public static ThemeEntity CreateThemeEntity(IDictionary<string, string> flatTheme, ILogger log)
         {
             string author = null;
             string title = null;
@@ -37,6 +37,7 @@ namespace MetroStart.Helpers
             Dictionary<string, string> themeContent = new Dictionary<string, string>();
             foreach (var (Key, Value) in flatTheme)
             {
+                log.LogInformation($"Adding Key={Key}, Value={Value}");
                 if (Key.Equals("author", StringComparison.InvariantCultureIgnoreCase))
                 {
                     author = Value;

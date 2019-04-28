@@ -23,7 +23,7 @@ namespace MetroStart
             ILogger log)
         {
 
-            var themeEntity = ThemeHelpers.CreateThemeEntity(req.GetQueryParameterDictionary());
+            var themeEntity = ThemeHelpers.CreateThemeEntity(req.GetQueryParameterDictionary(), log);
             if (await ThemeHelpers.ThemeExists(themeEntity.Title, log))
             {
                 return new ConflictResult();

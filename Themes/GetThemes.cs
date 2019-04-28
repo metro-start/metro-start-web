@@ -1,16 +1,10 @@
-using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.WindowsAzure.Storage.Table;
-using System.Collections.Generic;
 using System.Linq;
-using MetroStart.Entities;
 using MetroStart.Helpers;
 
 namespace MetroStart
@@ -25,14 +19,13 @@ namespace MetroStart
             var themes = await ThemeHelpers.GetAllThemes(log);
 
             return new OkObjectResult(
-                JsonConvert.SerializeObject(
                     themes.Select(t => new
                     {
                         t.Author,
                         t.Title,
                         t.Online,
                         t.ThemeContent
-                    })));
+                    }));
         }
     }
 }

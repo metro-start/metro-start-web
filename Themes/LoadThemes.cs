@@ -24,7 +24,7 @@ namespace MetroStart
             ILogger log)
         {
             var table = await ThemeHelpers.GetCloudTable(log);
-            var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeHelpers.CreateThemeEntity(t));
+            var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeHelpers.CreateThemeEntity(t, log));
             foreach (var themeEntity in themeEntities)
             {
                 try
