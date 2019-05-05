@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MetroStart.Entities;
+using MetroStart.Themes.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -26,6 +27,15 @@ namespace MetroStart.Helpers
             }
 
             throw new ApplicationException("Could not find connectionString.");
+        }
+
+        public static ThemeEntity CreateThemeEntity(SharedTheme theme, ILogger log)
+        {
+            return new ThemeEntity(
+                theme.Author.Nullable() ?? throw new ArgumentNullException(nameof(theme.Author)),
+                theme.Title.Nullable() ?? throw new ArgumentNullException(nameof(theme.Title)),
+                theme.Online,
+                theme.ThemeContent);
         }
 
         public static ThemeEntity CreateThemeEntity(IDictionary<string, string> flatTheme, ILogger log)
@@ -58,10 +68,11 @@ namespace MetroStart.Helpers
                 }
             }
 
-            _ = author.Nullable() ?? throw new ArgumentNullException(nameof(author));
-            _ = title.Nullable() ?? throw new ArgumentNullException(nameof(title));
-
-            return new ThemeEntity(author, title, online, themeContent);
+            return new ThemeEntity(
+                author.Nullable() ?? throw new ArgumentNullException(nameof(author)),
+                title.Nullable() ?? throw new ArgumentNullException(nameof(title)),
+                online,
+                themeContent);
         }
 
         public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, CloudTable table, ILogger log)

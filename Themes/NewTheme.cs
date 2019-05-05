@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
-using System.Collections.Generic;
 using System.Linq;
 using MetroStart.Entities;
 using MetroStart.Helpers;
+using MetroStart.Themes.Responses;
 
 namespace MetroStart
 {
@@ -22,8 +22,10 @@ namespace MetroStart
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-
-            var themeEntity = ThemeHelpers.CreateThemeEntity(req.GetQueryParameterDictionary(), log);
+            var jsonText = await req.ReadAsStringAsync();
+            log.LogInformation(jsonText);
+            var sharedTheme = JsonConvert.DeserializeObject<SharedTheme>(await req.ReadAsStringAsync());
+            var themeEntity = ThemeHelpers.CreateThemeEntity(sharedTheme, log);
             if (await ThemeHelpers.ThemeExists(themeEntity.Title, log))
             {
                 return new ConflictResult();

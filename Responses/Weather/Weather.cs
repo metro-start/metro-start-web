@@ -1,4 +1,4 @@
-namespace MetroStart.Weather.Models
+namespace MetroStart.Weather.Respnoses
 {
     using Newtonsoft.Json;
 

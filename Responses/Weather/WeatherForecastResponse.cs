@@ -4,7 +4,7 @@ namespace MetroStart.Weather.Respnoses
     using System.Collections.Generic;
 
     using System.Globalization;
-    using MetroStart.Weather.Models;
+    using MetroStart.Weather.Responses;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
