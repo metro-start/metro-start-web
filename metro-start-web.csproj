@@ -13,6 +13,9 @@
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="proxies.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
@@ -22,8 +25,5 @@
     <Folder Include="Weather\Models\" />
     <Folder Include="Weather\Responses\" />
     <Folder Include="Weather\Entities\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Weather\Entities\CurrentWeatherEntity %28copy%29.cs" />
   </ItemGroup>
 </Project>
