@@ -12,7 +12,7 @@ using Microsoft.Azure.WebJobs.Host;
 public static class LetsEncrypt
 {
     [FunctionName("letsencrypt")]
-    public static async Task<HttpResponseMessage> Run([HttpTrigger(
+    public static HttpResponseMessage Run([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
         Route = "letsencrypt/{code}")]HttpRequest req,
