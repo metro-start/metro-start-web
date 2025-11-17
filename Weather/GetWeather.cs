@@ -110,6 +110,5 @@ namespace MetroStart.Weather
                 throw e;
             }
         }
-
     }
 }
