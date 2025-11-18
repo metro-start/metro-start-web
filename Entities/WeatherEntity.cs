@@ -1,30 +1,17 @@
-using System;
-using System.Threading.Tasks;
+using Azure;
+using Azure.Data.Tables;
 using MetroStart.Weather.Respnoses;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
-using Newtonsoft.Json;
 
 namespace MetroStart.Entities
 {
-    public class WeatherEntity : TableEntity
+    public class WeatherEntity : ITableEntity
     {
-        public WeatherEntity(string location, string units, CurrentWeatherResponse currentWeather, WeatherForecastResponse weatherForecast)
-        {
-            PartitionKey = units;
-            RowKey = location;
 
-            CurrentWeather = currentWeather;
-            CurrentWeatherModified = DateTime.Now;
-
-            WeatherForecast = weatherForecast;
-            WeatherForecastModified = DateTime.Now;
-        }
-
-        public WeatherEntity()
-        {
-        }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
 
         public string Location => RowKey;
         public string Units => PartitionKey;
@@ -57,14 +44,24 @@ namespace MetroStart.Entities
             }
         }
 
-        public static async Task<CloudTable> GetCloudTable(ILogger log)
+        public WeatherEntity(string location, string units, CurrentWeatherResponse currentWeather, WeatherForecastResponse weatherForecast)
+        {
+            PartitionKey = units;
+            RowKey = location;
+
+            CurrentWeather = currentWeather;
+            CurrentWeatherModified = DateTime.Now;
+
+            WeatherForecast = weatherForecast;
+            WeatherForecastModified = DateTime.Now;
+        }
+
+        public static async Task<TableClient> GetCloudTable(ILogger log)
         {
             _ = log;
             if (Environment.GetEnvironmentVariable("METROSTART_TABLE_CONNECTION_STRING", EnvironmentVariableTarget.Process) is var connectionString)
             {
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-                CloudTable table = tableClient.GetTableReference("weather");
+                var table = new TableClient(connectionString, "weather");
 
                 // Create the table if it doesn't exist.
                 await table.CreateIfNotExistsAsync();

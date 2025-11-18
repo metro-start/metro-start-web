@@ -1,27 +1,18 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.WindowsAzure.Storage.Table;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Linq;
-using MetroStart.Entities;
 using MetroStart.Helpers;
+using Microsoft.Azure.Functions.Worker;
 
 namespace MetroStart
 {
-    public static class LoadThemes
+    public class LoadThemes
     {
-        [FunctionName("loadthemes")]
-        public static async Task<IActionResult> Run(
+        [Function("loadthemes")]
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+            ILogger<LoadThemes> log)
         {
             var table = await ThemeHelpers.GetCloudTable(log);
             var themeEntities = (await GetThemesFromGoogle(log)).Select(t => ThemeHelpers.CreateThemeEntity(t, log));
@@ -48,7 +39,7 @@ namespace MetroStart
             var response = await new HttpClient().GetAsync($"{themesUrl}");
             response.EnsureSuccessStatusCode();
 
-            var responseText = await response?.Content?.ReadAsStringAsync() ?? throw new InvalidDataException("Response was null");
+            var responseText = await response.Content.ReadAsStringAsync() ?? throw new InvalidDataException("Response was null");
             return JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(responseText) ?? throw new InvalidDataException("Deserialized object was null");
         }
     }

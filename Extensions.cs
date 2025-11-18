@@ -1,7 +1,3 @@
-using System;
-using MetroStart.Weather.Respnoses;
-using Newtonsoft.Json;
-
 namespace MetroStart
 {
     public static class Extensions

@@ -1,24 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using Azure.Data.Tables;
 using MetroStart.Entities;
 using MetroStart.Themes.Responses;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 
 namespace MetroStart.Helpers
 {
     public static class ThemeHelpers
     {
-        public static async Task<CloudTable> GetCloudTable(ILogger log)
+        public static async Task<TableClient> GetCloudTable(ILogger log)
         {
             if (System.Environment.GetEnvironmentVariable("METROSTART_TABLE_CONNECTION_STRING", EnvironmentVariableTarget.Process) is var connectionString)
             {
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-                CloudTable table = tableClient.GetTableReference("themes");
+                var table = new TableClient(connectionString, "weather");
 
                 // Create the table if it doesn't exist.
                 await table.CreateIfNotExistsAsync();
@@ -75,27 +68,22 @@ namespace MetroStart.Helpers
                 themeContent);
         }
 
-        public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, CloudTable table, ILogger log)
+        public static async Task<ThemeEntity> InsertTheme(ThemeEntity themeEntity, TableClient table, ILogger log)
         {
-            TableOperation insertOperation = TableOperation.Insert(themeEntity);
-
-            // Execute the insert operation.
-            log.LogDebug($"Saving new theme {themeEntity}");
-            return (await table.ExecuteAsync(insertOperation))?.Result as ThemeEntity ?? throw new InvalidDataException($"Theme {themeEntity} was not saved");
+            var response = table.AddEntity(themeEntity);
+            return response.IsError ? throw new InvalidDataException($"Theme {themeEntity} was not saved") : themeEntity ;
         }
 
         public static async Task<List<ThemeEntity>> GetAllThemes(ILogger log)
         {
             var table = await GetCloudTable(log);
-            TableContinuationToken tableToken = null;
-
             var results = new List<ThemeEntity>();
-            do
+
+            var queryResults = table.QueryAsync<ThemeEntity>();
+            await foreach (var theme in queryResults.AsPages())
             {
-                var segment = await table.ExecuteQuerySegmentedAsync(new TableQuery<ThemeEntity>(), tableToken) ?? throw new ApplicationException("No segment was returned.");
-                results.AddRange(segment.Results);
-                tableToken = segment.ContinuationToken;
-            } while (tableToken != null);
+                results.AddRange(theme.Values);
+            }
 
             return results;
         }
@@ -103,11 +91,12 @@ namespace MetroStart.Helpers
         public static async Task<bool> ThemeExists(string title, ILogger log)
         {
             var table = await GetCloudTable(log);
-            var results = await table.ExecuteQuerySegmentedAsync(
-                new TableQuery<ThemeEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, title)),
-                null) ?? throw new ApplicationException("No segment was returned.");
-
-            return results?.Results.Count > 0;
+            var results = table.QueryAsync((ThemeEntity t) => t.PartitionKey.Equals(title));
+            await foreach (var theme in results)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

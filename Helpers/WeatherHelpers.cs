@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using MetroStart.Entities;
+﻿using MetroStart.Entities;
 using MetroStart.Weather.Respnoses;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Table;
 
 namespace MetroStart.Helpers
 {
@@ -18,18 +13,16 @@ namespace MetroStart.Helpers
         public static async Task<WeatherEntity> GetCachedWeather(string location, string units, ILogger log)
         {
             var table = await WeatherEntity.GetCloudTable(log);
-            TableResult retrievedResult = await table.ExecuteAsync(TableOperation.Retrieve<WeatherEntity>(units, location));
-            return retrievedResult?.Result as WeatherEntity;
+            var retrievedResult = await table.GetEntityAsync<WeatherEntity>(units, location);
+            return retrievedResult.Value;
         }
 
         // Save the weather entity.
         public static async Task CacheWeather(WeatherEntity weather, ILogger log)
         {
             var table = await WeatherEntity.GetCloudTable(log);
-            TableOperation insertOperation = TableOperation.InsertOrReplace(weather);
-
-            var result = await table.ExecuteAsync(insertOperation);
-            log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} and mod dates:({weather.WeatherForecastModified.ToLongTimeString()}, {weather.CurrentWeatherModified.ToLongTimeString()}) with result: {result.HttpStatusCode}");
+            var result = table.AddEntity(weather);
+            log.LogInformation($"Caching current weather with location: {weather.Location}, units: {weather.Units} and mod dates:({weather.WeatherForecastModified.ToLongTimeString()}, {weather.CurrentWeatherModified.ToLongTimeString()}) with result: {result.Status}");
         }
 
         // Checks if the provided weatherEntity's currnet weather should be updated.
