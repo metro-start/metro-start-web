@@ -7,6 +7,9 @@ namespace MetroStart.Entities
 {
     public class WeatherEntity : ITableEntity
     {
+        public WeatherEntity()
+        {
+        }
 
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }

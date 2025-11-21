@@ -15,6 +15,9 @@ namespace MetroStart.Entities
             Online = online;
             ThemeContent = themeContent;
         }
+        public ThemeEntity()
+        {
+        }
 
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
