@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet publish --configuration Release --output ./output
+          dotnet build --configuration Release --output ./output
           popd
       
       - name: Login to Azure
@@ -50,4 +50,3 @@ jobs:
           app-name: 'metrostart-web'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
