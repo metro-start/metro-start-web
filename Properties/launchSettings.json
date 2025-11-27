@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "metro_start_web": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7070",
+      "launchBrowser": false
+    }
+  }
+}
