@@ -2,6 +2,7 @@ using MetroStart.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using MetroStart.SystemEndpoints;
 
 namespace MetroStart.Weather;
 
@@ -46,7 +47,7 @@ public sealed class GetWeather(
         }
 
         request.HttpContext.Response.Headers.CacheControl = "public, max-age=900";
-        request.HttpContext.Response.Headers["X-API-Version"] = "1";
+        request.HttpContext.Response.Headers["X-API-Version"] = ApiContract.Version;
         return new OkObjectResult(new WeatherResponse(
             weather.CurrentWeather.Name,
             weather.CurrentWeather.Sys.Country,

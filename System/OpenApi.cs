@@ -12,7 +12,7 @@ public sealed class OpenApi
         new OkObjectResult(new
         {
             openapi = "3.1.0",
-            info = new { title = "Metro Start API", version = "1.0.0" },
+            info = new { title = "Metro Start API", version = ApiContract.Version },
             paths = new Dictionary<string, object>
             {
                 ["/api/weather"] = Operation("get", "Get cached weather"),

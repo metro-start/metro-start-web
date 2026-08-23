@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using System.Security.Cryptography;
 using System.Text;
+using MetroStart.SystemEndpoints;
 
 namespace MetroStart.Themes;
 
@@ -26,26 +27,34 @@ public sealed class GetThemes(ThemeService themes)
             $"{theme.PartitionKey}:{theme.RowKey}:{theme.Timestamp:O}:{theme.ETag}"));
         var etag = $"\"{Convert.ToHexString(
             SHA256.HashData(Encoding.UTF8.GetBytes(fingerprint)))}\"";
+        request.HttpContext.Response.Headers.CacheControl = "public, max-age=300";
+        request.HttpContext.Response.Headers.ETag = etag;
+        request.HttpContext.Response.Headers["X-API-Version"] = ApiContract.Version;
+        request.HttpContext.Response.Headers.Append(
+            "Access-Control-Expose-Headers",
+            "ETag, X-API-Version, X-Continuation-Token");
         if (request.Headers.IfNoneMatch == etag)
         {
             return new StatusCodeResult(StatusCodes.Status304NotModified);
         }
-        request.HttpContext.Response.Headers.CacheControl = "public, max-age=300";
-        request.HttpContext.Response.Headers.ETag = etag;
-        request.HttpContext.Response.Headers["X-API-Version"] = "1";
         if (page.ContinuationToken is not null)
         {
             request.HttpContext.Response.Headers["X-Continuation-Token"] =
                 page.ContinuationToken;
         }
 
-        return new OkObjectResult(page.Items.Select(theme => new
-        {
-            Id = $"{theme.Author}:{theme.Title}",
+        return new OkObjectResult(page.Items.Select(theme => new ThemeResponse(
+            $"{theme.Author}:{theme.Title}",
             theme.Author,
             theme.Title,
             theme.Online,
-            theme.ThemeContent,
-        }));
+            theme.ThemeContent)));
     }
 }
+
+public sealed record ThemeResponse(
+    string Id,
+    string Author,
+    string Title,
+    bool Online,
+    Dictionary<string, string> ThemeContent);
