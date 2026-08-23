@@ -11,7 +11,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '10.0.x' # set this to the dotnet version to use
+  DOTNET_VERSION: '10.0.x'
 
 jobs:
   build-and-deploy:
@@ -25,16 +25,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
+      - name: Test
         shell: bash
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
+        run: dotnet test metro-start-web.sln --configuration Release
+
+      - name: Publish
+        shell: bash
+        run: dotnet publish metro-start-web.csproj --configuration Release --output ./output
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -50,3 +51,7 @@ jobs:
           app-name: 'metrostart-web'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Smoke test production health
+        shell: bash
+        run: curl --fail --retry 5 --retry-delay 10 https://api.metro-start.com/api/health
