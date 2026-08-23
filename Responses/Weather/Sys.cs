@@ -1,25 +1,25 @@
 namespace MetroStart.Weather.Responses
 {
-    using Newtonsoft.Json;
+    using System.Text.Json.Serialization;
 
     public class Sys
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public long Type { get; set; }
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("message")]
+        [JsonPropertyName("message")]
         public double Message { get; set; }
 
-        [JsonProperty("country")]
-        public string Country { get; set; }
+        [JsonPropertyName("country")]
+        public string Country { get; set; } = string.Empty;
 
-        [JsonProperty("sunrise")]
+        [JsonPropertyName("sunrise")]
         public long Sunrise { get; set; }
 
-        [JsonProperty("sunset")]
+        [JsonPropertyName("sunset")]
         public long Sunset { get; set; }
     }
 }

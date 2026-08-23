@@ -11,7 +11,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '10.0.x' # set this to the dotnet version to use
+  DOTNET_VERSION: '10.0.x'
 
 jobs:
   build-and-deploy:
@@ -22,26 +22,31 @@ jobs:
 
     steps:
       - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
+      - name: Test
         shell: bash
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
+        run: dotnet test metro-start-web.sln --configuration Release
+
+      - name: Publish
+        shell: bash
+        run: dotnet publish metro-start-web.csproj --configuration Release --output ./output
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_44BEBEB4367A4970B0313854DD8D7C7D }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8A6A56942C8C4F38916EC792422EC7D8 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CD85284D3F094F98A47AB4DCAA11CA52 }}
+
+      - name: Configure Azure Functions runtime
+        shell: bash
+        run: az resource update --resource-group metrostart --name metrostart-web --resource-type Microsoft.Web/sites --api-version 2024-04-01 --set properties.functionAppConfig.runtime.name=dotnet-isolated properties.functionAppConfig.runtime.version=10.0 --output none
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
@@ -50,3 +55,7 @@ jobs:
           app-name: 'metrostart-web'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Smoke test production health
+        shell: bash
+        run: curl --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 10 --connect-timeout 10 --max-time 20 https://api.metro-start.com/api/health

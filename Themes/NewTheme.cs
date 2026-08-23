@@ -1,34 +1,50 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using MetroStart.Helpers;
+using MetroStart.Services;
 using MetroStart.Themes.Responses;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using System.Text.Json;
 
-namespace MetroStart
+namespace MetroStart.Themes;
+
+public sealed class NewTheme(
+    ThemeService themes,
+    RequestRateLimiter rateLimiter)
 {
-    public class NewTheme
+    [Function("newtheme")]
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest request,
+        CancellationToken cancellationToken)
     {
-        [Function("newtheme")]
-        public  async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger<NewTheme> log)
+        if (!rateLimiter.TryAcquire(
+            "newtheme",
+            request.GetClientId(),
+            10,
+            TimeSpan.FromMinutes(1)))
         {
-            var sharedTheme = await req.ReadFromJsonAsync<SharedTheme>();
-            if (sharedTheme == null)
-            {
-                return new BadRequestResult();
-            }
-
-            var themeEntity = ThemeHelpers.CreateThemeEntity(sharedTheme, log);
-            if (await ThemeHelpers.ThemeExists(themeEntity.Title, log))
-            {
-                return new ConflictResult();
-            }
-
-            var table = await ThemeHelpers.GetCloudTable(log);
-            await ThemeHelpers.InsertTheme(themeEntity, table, log);
-            return new OkResult();
+            return new StatusCodeResult(StatusCodes.Status429TooManyRequests);
         }
+        if (request.ContentLength > 65_536)
+        {
+            return new BadRequestObjectResult("The theme payload is too large.");
+        }
+
+        SharedTheme? theme;
+        try
+        {
+            theme = await request.ReadFromJsonAsync<SharedTheme>(cancellationToken);
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult("The theme JSON is invalid.");
+        }
+        if (theme is null || !ApiValidation.IsValidTheme(theme))
+        {
+            return new BadRequestObjectResult("The theme is invalid.");
+        }
+
+        return await themes.TryAddAsync(theme, cancellationToken)
+            ? new OkResult()
+            : new ConflictResult();
     }
 }

@@ -1,20 +1,19 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MetroStart.Themes.Responses
 {
     public class SharedTheme
     {
-        [JsonProperty("title")]
-        public string Title { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = string.Empty;
 
-        [JsonProperty("author")]
-        public string Author { get; set; }
+        [JsonPropertyName("author")]
+        public string Author { get; set; } = string.Empty;
 
-        [JsonProperty("online")]
+        [JsonPropertyName("online")]
         public bool Online { get; set; }
 
-        [JsonProperty("themeContent")]
-        public Dictionary<string, string> ThemeContent { get; set; }
+        [JsonPropertyName("themeContent")]
+        public Dictionary<string, string> ThemeContent { get; set; } = [];
     }
 }

@@ -1,23 +1,22 @@
 
-namespace MetroStart.Weather.Responses
+namespace MetroStart.Weather.Responses;
+
+using System.Text.Json.Serialization;
+
+public class Main
 {
-    using Newtonsoft.Json;
+    [JsonPropertyName("temp")]
+    public double Temp { get; set; }
 
-    public class Main
-    {
-        [JsonProperty("temp")]
-        public double Temp { get; set; }
+    [JsonPropertyName("pressure")]
+    public long Pressure { get; set; }
 
-        [JsonProperty("pressure")]
-        public long Pressure { get; set; }
+    [JsonPropertyName("humidity")]
+    public long Humidity { get; set; }
 
-        [JsonProperty("humidity")]
-        public long Humidity { get; set; }
+    [JsonPropertyName("temp_min")]
+    public double TempMin { get; set; }
 
-        [JsonProperty("temp_min")]
-        public double TempMin { get; set; }
-
-        [JsonProperty("temp_max")]
-        public double TempMax { get; set; }
-    }
+    [JsonPropertyName("temp_max")]
+    public double TempMax { get; set; }
 }
