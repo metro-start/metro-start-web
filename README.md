@@ -7,7 +7,6 @@ runs on Azure Flex Consumption in Canada Central.
 
 - `METROSTART_TABLE_CONNECTION_STRING`: Azure Table Storage connection string.
 - `WEATHER_API_KEY`: OpenWeatherMap API key.
-- `FUNCTIONS_WORKER_RUNTIME`: `dotnet-isolated`.
 
 Secrets belong in local user secrets or Azure application settings and must not
 be committed.
@@ -46,8 +45,9 @@ func azure functionapp publish metrostart-web --dotnet-isolated
 curl --fail https://api.metro-start.com/api/health
 ```
 
-The deployed Function App must use the .NET 10 isolated runtime and define
-`METROSTART_TABLE_CONNECTION_STRING`, `WEATHER_API_KEY`, and
-`FUNCTIONS_WORKER_RUNTIME=dotnet-isolated`. Connection-string authentication is
-retained intentionally. API release 1.1 remains compatible with Metro Start
-10.11 and exposes pagination headers for the browser clients.
+The deployed Flex Function App must use the .NET 10 isolated runtime and define
+`METROSTART_TABLE_CONNECTION_STRING` and `WEATHER_API_KEY`. Flex stores its
+worker runtime in `functionAppConfig`, so `FUNCTIONS_WORKER_RUNTIME` must not be
+added as an application setting. Connection-string authentication is retained
+intentionally. API release 1.1 remains compatible with Metro Start 10.11 and
+exposes pagination headers for the browser clients.
