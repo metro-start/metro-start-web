@@ -12,7 +12,6 @@ on:
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '10.0.x'
-  AZURE_CORE_OUTPUT: none
 
 jobs:
   build-and-deploy:
@@ -48,8 +47,8 @@ jobs:
       - name: Configure Azure Functions runtime
         shell: bash
         run: |
-          az functionapp runtime config set --name metrostart-web --resource-group metrostart --runtime-version 10.0
-          az functionapp config appsettings set --name metrostart-web --resource-group metrostart --settings FUNCTIONS_WORKER_RUNTIME=dotnet-isolated FUNCTIONS_EXTENSION_VERSION=~4
+          az resource update --resource-group metrostart --name metrostart-web --resource-type Microsoft.Web/sites --api-version 2024-04-01 --set properties.functionAppConfig.runtime.name=dotnet-isolated properties.functionAppConfig.runtime.version=10.0 --output none
+          az functionapp config appsettings set --name metrostart-web --resource-group metrostart --settings FUNCTIONS_WORKER_RUNTIME=dotnet-isolated FUNCTIONS_EXTENSION_VERSION=~4 --output none
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
