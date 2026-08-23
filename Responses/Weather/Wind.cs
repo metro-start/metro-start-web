@@ -1,12 +1,12 @@
 namespace MetroStart.Weather.Responses;
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 public class Wind
 {
-    [JsonProperty("speed")]
-    public long Speed { get; set; }
+    [JsonPropertyName("speed")]
+    public double Speed { get; set; }
 
-    [JsonProperty("deg")]
+    [JsonPropertyName("deg")]
     public long Deg { get; set; }
 }

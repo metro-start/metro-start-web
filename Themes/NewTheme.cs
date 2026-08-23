@@ -1,33 +1,50 @@
-using MetroStart.Helpers;
+using MetroStart.Services;
 using MetroStart.Themes.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace MetroStart.Themes;
 
-public class NewTheme
+public sealed class NewTheme(
+    ThemeService themes,
+    RequestRateLimiter rateLimiter)
 {
     [Function("newtheme")]
-    public  async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-        ILogger<NewTheme> log)
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest request,
+        CancellationToken cancellationToken)
     {
-        var sharedTheme = await req.ReadFromJsonAsync<SharedTheme>();
-        if (sharedTheme == null)
+        if (!rateLimiter.TryAcquire(
+            "newtheme",
+            request.GetClientId(),
+            10,
+            TimeSpan.FromMinutes(1)))
         {
-            return new BadRequestResult();
+            return new StatusCodeResult(StatusCodes.Status429TooManyRequests);
+        }
+        if (request.ContentLength > 65_536)
+        {
+            return new BadRequestObjectResult("The theme payload is too large.");
         }
 
-        var themeEntity = ThemeHelpers.CreateThemeEntity(sharedTheme, log);
-        if (await ThemeHelpers.ThemeExists(themeEntity.Title, log))
+        SharedTheme? theme;
+        try
         {
-            return new ConflictResult();
+            theme = await request.ReadFromJsonAsync<SharedTheme>(cancellationToken);
+        }
+        catch (JsonException)
+        {
+            return new BadRequestObjectResult("The theme JSON is invalid.");
+        }
+        if (theme is null || !ApiValidation.IsValidTheme(theme))
+        {
+            return new BadRequestObjectResult("The theme is invalid.");
         }
 
-        var table = await ThemeHelpers.GetCloudTable(log);
-        await ThemeHelpers.InsertTheme(themeEntity, table, log);
-        return new OkResult();
+        return await themes.TryAddAsync(theme, cancellationToken)
+            ? new OkResult()
+            : new ConflictResult();
     }
 }

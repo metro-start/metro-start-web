@@ -1,122 +1,97 @@
-namespace MetroStart.Weather.Respnoses
+namespace MetroStart.Weather.Responses
 {
-    using System;
-    using System.Collections.Generic;
-
-    using System.Globalization;
-    using MetroStart.Weather.Responses;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
     public class WeatherForecastResponse
     {
-        [JsonProperty("cod")]
-        public string Cod { get; set; }
+        [JsonPropertyName("cod")]
+        public string Cod { get; set; } = string.Empty;
 
-        [JsonProperty("message")]
+        [JsonPropertyName("message")]
         public double Message { get; set; }
 
-        [JsonProperty("city")]
-        public City City { get; set; }
+        [JsonPropertyName("city")]
+        public City? City { get; set; }
 
-        [JsonProperty("cnt")]
+        [JsonPropertyName("cnt")]
         public long Count { get; set; }
 
-        [JsonProperty("list")]
-        public WeatherList[] WeatherList { get; set; }
+        [JsonPropertyName("list")]
+        public WeatherList[] WeatherList { get; set; } = [];
 
-        public static WeatherForecastResponse FromJson(string json) => JsonConvert.DeserializeObject<WeatherForecastResponse>(json, Converter.Settings);
+        public static WeatherForecastResponse? FromJson(string json) =>
+            JsonSerializer.Deserialize<WeatherForecastResponse>(json);
 
-        public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
-
-        internal static class Converter
-        {
-            public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-            {
-                MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-                DateParseHandling = DateParseHandling.None,
-                Converters =
-                {
-                    new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-                }
-            };
-        }
+        public string ToJson() => JsonSerializer.Serialize(this);
     }
 
     public class City
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
 
-        [JsonProperty("coord")]
-        public Coord Coord { get; set; }
+        [JsonPropertyName("coord")]
+        public Coord? Coord { get; set; }
 
-        [JsonProperty("country")]
-        public string Country { get; set; }
+        [JsonPropertyName("country")]
+        public string Country { get; set; } = string.Empty;
     }
 
     public class WeatherList
     {
-        [JsonProperty("dt")]
+        [JsonPropertyName("dt")]
         public long Dt { get; set; }
 
-        [JsonProperty("main")]
-        public Main Main { get; set; }
+        [JsonPropertyName("main")]
+        public Main Main { get; set; } = new();
 
-        [JsonProperty("weather")]
-        public Weather[] Weather { get; set; }
+        [JsonPropertyName("weather")]
+        public Weather[] Weather { get; set; } = [];
 
-        [JsonProperty("speed")]
-        public Wind Wind { get; internal set; }
+        [JsonPropertyName("wind")]
+        public Wind? Wind { get; set; }
 
-        [JsonProperty("rain")]
-        public Rain Rain { get; internal set; }
+        [JsonPropertyName("rain")]
+        public Rain? Rain { get; set; }
 
-        [JsonProperty("snow")]
-        public Snow Snow { get; internal set; }
-    }
-
-    public class Wind
-    {
-        [JsonProperty("speed")]
-        public long Speed { get; set; }
-        [JsonProperty("deg")]
-        public long Deg { get; set; }
+        [JsonPropertyName("snow")]
+        public Snow? Snow { get; set; }
     }
 
     public class Snow
     {
-        [JsonProperty("3h")]
-        public long ThreeHours { get; set; }
+        [JsonPropertyName("3h")]
+        public double ThreeHours { get; set; }
     }
 
     public class Rain
     {
-        [JsonProperty("3h")]
-        public long ThreeHours { get; set; }
+        [JsonPropertyName("3h")]
+        public double ThreeHours { get; set; }
     }
 
     public class Temp
     {
-        [JsonProperty("day")]
+        [JsonPropertyName("day")]
         public double Day { get; set; }
 
-        [JsonProperty("min")]
+        [JsonPropertyName("min")]
         public double Min { get; set; }
 
-        [JsonProperty("max")]
+        [JsonPropertyName("max")]
         public double Max { get; set; }
 
-        [JsonProperty("night")]
+        [JsonPropertyName("night")]
         public double Night { get; set; }
 
-        [JsonProperty("eve")]
+        [JsonPropertyName("eve")]
         public double Eve { get; set; }
 
-        [JsonProperty("morn")]
+        [JsonPropertyName("morn")]
         public double Morn { get; set; }
     }
 }

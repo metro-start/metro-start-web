@@ -1,63 +1,49 @@
-namespace MetroStart.Weather.Respnoses
+namespace MetroStart.Weather.Responses
 {
-    using System.Globalization;
-    using MetroStart.Weather.Responses;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
     public class CurrentWeatherResponse
     {
-        [JsonProperty("cod")]
+        [JsonPropertyName("cod")]
         public long Cod { get; set; }
 
-        [JsonProperty("coord")]
-        public Coord Coord { get; set; }
+        [JsonPropertyName("coord")]
+        public Coord? Coord { get; set; }
 
-        [JsonProperty("weather")]
-        public Weather[] Weather { get; set; }
+        [JsonPropertyName("weather")]
+        public Weather[] Weather { get; set; } = [];
 
-        [JsonProperty("base")]
-        public string Base { get; set; }
+        [JsonPropertyName("base")]
+        public string Base { get; set; } = string.Empty;
 
-        [JsonProperty("main")]
-        public Main Main { get; set; }
+        [JsonPropertyName("main")]
+        public Main Main { get; set; } = new();
 
-        [JsonProperty("visibility")]
+        [JsonPropertyName("visibility")]
         public long Visibility { get; set; }
 
-        [JsonProperty("wind")]
-        public Wind Wind { get; set; }
+        [JsonPropertyName("wind")]
+        public Wind? Wind { get; set; }
 
-        [JsonProperty("clouds")]
-        public Clouds Clouds { get; set; }
+        [JsonPropertyName("clouds")]
+        public Clouds? Clouds { get; set; }
 
-        [JsonProperty("dt")]
+        [JsonPropertyName("dt")]
         public long Dt { get; set; }
 
-        [JsonProperty("sys")]
-        public Sys Sys { get; set; }
+        [JsonPropertyName("sys")]
+        public Sys Sys { get; set; } = new();
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
 
-        public static CurrentWeatherResponse? FromJson(string json) => JsonConvert.DeserializeObject<CurrentWeatherResponse>(json, Converter.Settings);
+        public static CurrentWeatherResponse? FromJson(string json) =>
+            JsonSerializer.Deserialize<CurrentWeatherResponse>(json);
 
-        public string ToJson() => JsonConvert.SerializeObject(this, Converter.Settings);
-
-        internal static class Converter
-        {
-            public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-            {
-                MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-                DateParseHandling = DateParseHandling.None,
-                Converters =
-                {
-                    new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-                }
-            };
-        }
+        public string ToJson() => JsonSerializer.Serialize(this);
     }
 }
